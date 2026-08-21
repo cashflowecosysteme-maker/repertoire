@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produit — Répertoire NyXia</title>
+<link rel="icon" type="image/png" href="/FavIcon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060a18;--p:#7B5CFF;--p2:#5A6CFF;--pl:#a78bfa;--t2:#b9b3d6;--t3:#7c73a0;--border:rgba(123,92,255,.2);--green:#34d399}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Outfit,sans-serif;background:var(--bg);color:var(--t2);min-height:100vh;line-height:1.55}
+#starry-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:28px 20px 60px}
+a.back{color:var(--pl);font-size:.9rem}
+.card{margin-top:14px;background:rgba(14,20,48,.9);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+.media{aspect-ratio:16/9;background:#0a1028;display:flex;align-items:center;justify-content:center}
+.media img{width:100%;height:100%;object-fit:cover}
+.body{padding:24px}
+.badge{display:inline-block;padding:6px 12px;border-radius:50px;background:rgba(123,92,255,.12);border:1px solid rgba(123,92,255,.28);color:var(--pl);font-size:.78rem;margin-bottom:12px}
+h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.9rem;color:#fff;margin-bottom:10px}
+.desc,.guide{color:var(--t2);margin-bottom:14px;white-space:pre-wrap;font-size:.95rem}
+.price{font-size:1.3rem;font-weight:700;color:var(--green);margin-bottom:16px}
+h2{font-size:1rem;color:#fff;margin:20px 0 8px;font-weight:600}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.btn{display:inline-flex;padding:13px 18px;border-radius:12px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-weight:700;text-decoration:none;font-size:.92rem;border:none;cursor:pointer;font-family:Outfit,sans-serif}
+.btn-ghost{background:rgba(123,92,255,.12);border:1px solid var(--border)}
+.tag{font-size:.8rem;color:var(--t3);margin-left:6px}
+.err{padding:40px;text-align:center;color:var(--t3)}
+.ref{font-size:.88rem;color:var(--pl);margin-bottom:12px}
+</style>
+</head>
+<body>
+<canvas id="starry-canvas"></canvas>
+<div class="wrap">
+  <a class="back" href="/">← Répertoire</a>
+  <div class="card" id="box"><div class="err">Chargement…</div></div>
+</div>
+<script src="/starry-bg.js" defer></script>
+<script>
+(function(){
+  var params = new URLSearchParams(location.search);
+  var id = params.get('id') || '';
+  var ref = (params.get('ref') || params.get('code') || '').trim().toUpperCase();
+  if (ref) {
+    try {
+      localStorage.setItem('nyxia_ref', ref);
+      document.cookie = 'nyxia_ref=' + encodeURIComponent(ref) + '; path=/; max-age=' + (90*24*3600) + '; SameSite=Lax';
+    } catch (e) {}
+  } else {
+    try { ref = localStorage.getItem('nyxia_ref') || ''; } catch (e) { ref = ''; }
+  }
+
+  function withRef(url) {
+    if (!url) return '';
+    if (!ref) return url;
+    try {
+      var u = new URL(url, location.origin);
+      u.searchParams.set('ref', ref);
+      return u.toString();
+    } catch (e) {
+      return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'ref=' + encodeURIComponent(ref);
+    }
+  }
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+  function money(n){ return Number(n||0).toLocaleString('fr-CA',{minimumFractionDigits:2,maximumFractionDigits:2})+' $'; }
+  function formatTarif(p){
+    var bt = p.billing_type || 'one_time';
+    var u = money(p.price), m = money(p.price_monthly);
+    if (bt === 'subscription') return m + ' / mois';
+    if (bt === 'both') return u + ' + ' + m + ' / mois';
+    return u;
+  }
+
+  if (!id) {
+    document.getElementById('box').innerHTML = '<div class="err">Produit manquant.</div>';
+    return;
+  }
+
+  fetch('/api/product?id=' + encodeURIComponent(id))
+    .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }); })
+    .then(function(res){
+      var box = document.getElementById('box');
+      if (!res.ok || !res.d.product) {
+        box.innerHTML = '<div class="err">Produit introuvable ou non publié.</div>';
+        return;
+      }
+      var p = res.d.product;
+      document.title = (p.title || 'Produit') + ' — Répertoire NyXia';
+
+      var media = p.image_url
+        ? '<div class="media"><img src="'+esc(p.image_url)+'" alt=""></div>'
+        : '<div class="media"><img src="/NyXia.png" alt="" style="width:90px;height:90px;border-radius:50%"></div>';
+
+      var joinType = (p.join_type || 'free');
+      var joinLabel = joinType === 'paid' ? 'Rejoindre le cercle (payant)' : 'Rejoindre le cercle (gratuit)';
+      var joinUrl = withRef(p.join_url || '');
+      var offerUrl = withRef(p.affiliate_link || '');
+
+      var guide = (p.promo_guide || '').trim();
+      var guideBlock = guide
+        ? '<h2>Comment en faire la promotion</h2><div class="guide">'+esc(guide)+'</div>'
+        : '<h2>Comment en faire la promotion</h2><p class="guide" style="color:var(--t3)">Le guide de promotion sera ajouté par l’Admin pour ce produit (publications, angles, messages types…).</p>';
+
+      var btns = '<div class="btns">';
+      if (joinUrl) {
+        btns += '<a class="btn" href="'+esc(joinUrl)+'" target="_blank" rel="noopener">'+esc(joinLabel)+' →</a>';
+      } else {
+        btns += '<span class="btn" style="opacity:.45;cursor:default">Lien cercle à venir</span>';
+      }
+      if (offerUrl) {
+        btns += '<a class="btn btn-ghost" href="'+esc(offerUrl)+'" target="_blank" rel="noopener">Voir la page de vente</a>';
+      }
+      btns += '</div>';
+
+      var refLine = ref
+        ? '<p class="ref">Code parrain actif : <strong style="color:#fff">'+esc(ref)+'</strong></p>'
+        : '';
+
+      box.innerHTML = media +
+        '<div class="body">' +
+          '<span class="badge">✦ Répertoire · Cercle d’entraide</span>' +
+          '<h1>'+esc(p.title)+'</h1>' +
+          refLine +
+          '<p class="desc">'+esc(p.description_long || p.description_short || '')+'</p>' +
+          '<div class="price">'+formatTarif(p)+'</div>' +
+          guideBlock +
+          '<h2>Rejoindre</h2>' +
+          btns +
+        '</div>';
+    })
+    .catch(function(){
+      document.getElementById('box').innerHTML = '<div class="err">Impossible de charger le produit.</div>';
+    });
+})();
+</script>
+</body>
+</html>
