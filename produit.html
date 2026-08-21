@@ -2,45 +2,125 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Produit — Répertoire NyXia</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="/FavIcon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg1:#0A1628;--p:#7B5CFF;--p2:#5A6CFF;--t:#fff;--t2:#D6D9F0;--t3:#8891B8;--green:#00E676}
+:root{--bg:#060a18;--card:#0e1430;--p:#7B5CFF;--p2:#5A6CFF;--pl:#a78bfa;--t2:#b9b3d6;--t3:#7c73a0;--border:rgba(123,92,255,.2);--green:#34d399}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Outfit,sans-serif;background:var(--bg1);color:var(--t2);padding:28px;min-height:100vh}
-.wrap{max-width:720px;margin:0 auto}
-a{color:#a78bfa;text-decoration:none}
-.card{background:rgba(123,92,255,.06);border:1px solid rgba(123,92,255,.15);border-radius:18px;padding:24px;margin-top:16px}
-h1{font-family:'Space Grotesk',sans-serif;font-size:26px;color:#fff;margin-bottom:8px}
-.price{font-size:22px;color:var(--green);font-weight:700;margin:12px 0}
-.sub{color:var(--t3);font-size:14px;line-height:1.55}
-.btn{display:inline-block;margin-top:16px;padding:12px 18px;border-radius:12px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-weight:600;font-size:13px}
+body{font-family:Outfit,sans-serif;background:var(--bg);color:var(--t2);min-height:100vh;line-height:1.55}
+#starry-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:28px 20px 60px}
+a.back{color:var(--pl);font-size:.9rem}
+.card{margin-top:16px;background:rgba(14,20,48,.85);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+.media{aspect-ratio:16/9;background:#0a1028;display:flex;align-items:center;justify-content:center}
+.media img{width:100%;height:100%;object-fit:cover}
+.media .ph{width:80px;height:80px;border-radius:50%;opacity:.85}
+.body{padding:24px}
+h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(1.6rem,3vw,2.2rem);color:#fff;margin-bottom:10px}
+.desc{color:var(--t2);font-size:1rem;margin-bottom:14px;white-space:pre-wrap}
+.price{font-size:1.5rem;font-weight:700;color:var(--green);margin-bottom:16px}
+.btn{display:inline-flex;padding:13px 20px;border-radius:12px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-weight:700;text-decoration:none;font-size:.95rem}
+.share{margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.share label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;color:var(--t3);margin-bottom:8px}
+.share code{display:block;padding:12px;border-radius:10px;background:rgba(6,10,24,.6);border:1px solid var(--border);color:#fff;font-size:.82rem;word-break:break-all;margin-bottom:10px}
+.btn-ghost{background:rgba(123,92,255,.12);border:1px solid var(--border);color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-family:Outfit,sans-serif;font-size:.85rem}
+.err{padding:40px;text-align:center;color:var(--t3)}
 </style>
 </head>
 <body>
+<canvas id="starry-canvas"></canvas>
 <div class="wrap">
-  <a href="/repertoire.html">← Retour au répertoire</a>
-  <div class="card" id="box">Chargement…</div>
+  <a class="back" href="/">← Répertoire</a>
+  <div class="card" id="box"><div class="err">Chargement…</div></div>
 </div>
+<script src="/starry-bg.js" defer></script>
 <script>
-var id = new URLSearchParams(location.search).get('id') || '';
-fetch('/api/repertoire').then(function(r){return r.json()}).then(function(data){
-  var list = data.products || [];
-  var p = list.find(function(x){ return String(x.id) === String(id); });
-  var box = document.getElementById('box');
-  if (!p) { box.innerHTML = '<p class="sub">Produit introuvable ou non publié.</p>'; return; }
-  var price = Number(p.price||0).toLocaleString('fr-CA',{minimumFractionDigits:2,maximumFractionDigits:2})+' $';
-  box.innerHTML = '<h1></h1><p class="sub" id="d"></p><div class="price"></div>';
-  box.querySelector('h1').textContent = p.title || '';
-  box.querySelector('#d').textContent = p.description_short || '';
-  box.querySelector('.price').textContent = price;
-  if (p.affiliate_link) {
-    var a = document.createElement('a');
-    a.className = 'btn'; a.href = p.affiliate_link; a.textContent = 'Accéder à l’offre';
-    box.appendChild(a);
+(function(){
+  var params = new URLSearchParams(location.search);
+  var id = params.get('id') || '';
+  var ref = (params.get('ref') || params.get('code') || '').trim().toUpperCase();
+  if (ref) {
+    try { localStorage.setItem('nyxia_ref', ref); } catch(e){}
+  } else {
+    try { ref = localStorage.getItem('nyxia_ref') || ''; } catch(e){ ref=''; }
   }
-}).catch(function(){ document.getElementById('box').textContent = 'Erreur de chargement.'; });
+
+  function withRef(url) {
+    if (!ref || !url) return url || '#';
+    try {
+      var u = new URL(url, location.origin);
+      u.searchParams.set('ref', ref);
+      return u.toString();
+    } catch(e) {
+      return url + (url.indexOf('?')>=0?'&':'?') + 'ref=' + encodeURIComponent(ref);
+    }
+  }
+
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+  function money(n){return Number(n||0).toLocaleString('fr-CA',{minimumFractionDigits:2,maximumFractionDigits:2})+' $';}
+  function formatTarif(p){
+    var bt = p.billing_type || 'one_time';
+    var u = money(p.price), m = money(p.price_monthly);
+    if (bt === 'subscription') return m + ' / mois';
+    if (bt === 'both') return u + ' + ' + m + ' / mois';
+    return u;
+  }
+
+  if (!id) {
+    document.getElementById('box').innerHTML = '<div class="err">Produit manquant.</div>';
+    return;
+  }
+
+  fetch('/api/product?id=' + encodeURIComponent(id))
+    .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }); })
+    .then(function(res){
+      var box = document.getElementById('box');
+      if (!res.ok || !res.d.product) {
+        box.innerHTML = '<div class="err">Produit introuvable ou non publié.</div>';
+        return;
+      }
+      var p = res.d.product;
+      document.title = (p.title || 'Produit') + ' — Répertoire NyXia';
+
+      // Lien d'offre = affiliate_link du produit (page de vente Systeme.io etc.)
+      var offer = p.affiliate_link || '';
+      var offerWithRef = withRef(offer);
+
+      // Lien de partage fiche (pour le promoteur)
+      var shareUrl = location.origin + '/produit.html?id=' + encodeURIComponent(p.id);
+      if (ref) shareUrl += '&ref=' + encodeURIComponent(ref);
+
+      var media = p.image_url
+        ? '<div class="media"><img src="'+esc(p.image_url)+'" alt=""></div>'
+        : '<div class="media"><img class="ph" src="/NyXia.png" alt="NyXia"></div>';
+
+      var cta = offer
+        ? '<a class="btn" id="ctaOffer" href="'+esc(offerWithRef)+'" target="_blank" rel="noopener">Accéder à l’offre →</a>'
+        : '<p style="color:var(--t3);font-size:.9rem">Lien d’offre à venir</p>';
+
+      box.innerHTML = media +
+        '<div class="body">' +
+          '<h1>'+esc(p.title)+'</h1>' +
+          '<p class="desc">'+esc(p.description_long || p.description_short || '')+'</p>' +
+          '<div class="price">'+formatTarif(p)+'</div>' +
+          cta +
+          '<div class="share">' +
+            '<label>Lien de cette fiche (à partager)</label>' +
+            '<code id="share">'+esc(shareUrl)+'</code>' +
+            '<button type="button" class="btn-ghost" id="copy">Copier le lien</button>' +
+          '</div>' +
+        '</div>';
+
+      document.getElementById('copy').onclick = function(){
+        navigator.clipboard.writeText(shareUrl);
+      };
+    })
+    .catch(function(){
+      document.getElementById('box').innerHTML = '<div class="err">Impossible de charger le produit.</div>';
+    });
+})();
 </script>
 </body>
 </html>
