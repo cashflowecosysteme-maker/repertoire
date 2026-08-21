@@ -350,11 +350,23 @@ button.card-cta,.card-cta{font:inherit;width:100%;text-align:center;
 .prod-modal-btns .btn-promo{display:inline-flex;padding:13px 18px;border-radius:12px;background:rgba(123,92,255,.12);border:1px solid rgba(123,92,255,.3);color:#fff;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;font-size:.92rem}
 .prod-modal-x{position:absolute;top:12px;right:14px;background:rgba(0,0,0,.35);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.2rem;z-index:2}
 .prod-modal-wrap{position:relative}
-.promo-panel{display:none;margin-top:16px;padding:14px;border-radius:14px;background:rgba(6,10,24,.5);border:1px solid rgba(123,92,255,.25)}
+.promo-panel{display:none;margin-top:16px;padding:16px;border-radius:14px;background:rgba(6,10,24,.65);border:1px solid rgba(123,92,255,.3)}
 .promo-panel.open{display:block}
 .promo-panel h3{color:#fff;font-size:.95rem;margin:0 0 8px}
-.promo-panel .guide{white-space:pre-wrap;color:#b9b3d6;font-size:.9rem;margin-bottom:12px}
-.promo-panel code{display:block;word-break:break-all;padding:10px;border-radius:10px;background:rgba(0,0,0,.35);border:1px solid rgba(123,92,255,.2);color:#fff;font-size:.78rem;margin:8px 0}
+.promo-panel .guide{white-space:pre-wrap;color:#b9b3d6;font-size:.9rem;margin-bottom:12px;line-height:1.5}
+.promo-panel .benefit{font-size:.88rem;color:#c4b5fd;margin:0 0 12px;padding:10px 12px;border-radius:10px;background:rgba(123,92,255,.12);border:1px solid rgba(123,92,255,.22)}
+.promo-panel code{display:block;word-break:break-all;padding:10px;border-radius:10px;background:rgba(0,0,0,.45);border:1px solid rgba(123,92,255,.25);color:#e9e5ff;font-size:.78rem;margin:8px 0 12px}
+.promo-panel .btn-copy{
+  display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:12px;
+  background:linear-gradient(135deg,#7B5CFF,#5A6CFF);color:#fff!important;font-weight:700;
+  border:none;cursor:pointer;font-family:Outfit,sans-serif;font-size:.9rem
+}
+.promo-panel .btn-join{
+  display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:12px;
+  background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.4);color:#34d399!important;
+  font-weight:700;text-decoration:none;font-family:Outfit,sans-serif;font-size:.9rem;margin-left:8px
+}
+.promo-panel .btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
 
 
 .card-actions{display:flex;flex-direction:column;gap:8px;margin-top:6px}
@@ -536,7 +548,7 @@ function openProductModal(id){
   else { buy.removeAttribute('href'); buy.style.display = 'none'; }
   document.getElementById('promoPanel').classList.remove('open');
   var guide = (p.promo_guide||'').trim();
-  document.getElementById('promoGuide').textContent = guide || 'Le guide de promotion sera ajouté par l’équipe.';
+  document.getElementById('promoGuide').textContent = guide || 'Bientôt : publications prêtes, angles et messages types pour présenter ce produit facilement.';
   var share = location.origin + '/?product=' + encodeURIComponent(p.id) + (window.__NYXIA_REF ? '&ref='+encodeURIComponent(window.__NYXIA_REF) : '');
   document.getElementById('promoShare').textContent = share;
   var join = document.getElementById('promoJoin');
@@ -552,11 +564,16 @@ function openProductModal(id){
   // Acheter dans la modal aussi
   var buyBtn = document.getElementById('prodModalBuy');
   if (buyBtn && (!p.affiliate_link)) buyBtn.style.display = 'none';
-  document.getElementById('promoCopy').onclick = function(){
-    navigator.clipboard.writeText(share);
-    this.textContent = 'Copié ✓';
-    var b=this; setTimeout(function(){ b.textContent='Copier le lien'; }, 1500);
-  };
+  var copyBtn = document.getElementById('promoCopy');
+  if (copyBtn) {
+    copyBtn.textContent = 'Copier le lien';
+    copyBtn.onclick = function(){
+      navigator.clipboard.writeText(share).then(function(){
+        copyBtn.textContent = 'Copié ✓';
+        setTimeout(function(){ copyBtn.textContent = 'Copier le lien'; }, 1600);
+      });
+    };
+  }
 }
 
 function bindProductButtons(){
@@ -806,11 +823,14 @@ fetch('/api/repertoire')
       </div>
       <div class="promo-panel" id="promoPanel">
         <h3>Faire la promotion</h3>
+        <p class="benefit" id="promoBenefit">En partageant ce produit, tu aides le Cercle et tu peux être relié aux ventes via ton lien personnel.</p>
         <div class="guide" id="promoGuide"></div>
-        <h3>Lien à partager</h3>
+        <h3>Ton lien à partager</h3>
         <code id="promoShare"></code>
-        <button type="button" class="btn-promo" id="promoCopy">Copier le lien</button>
-        <a class="btn-buy" id="promoJoin" href="#" target="_blank" rel="noopener" style="display:none;margin-left:8px">Rejoindre le cercle</a>
+        <div class="btn-row">
+          <button type="button" class="btn-copy" id="promoCopy">Copier le lien</button>
+          <a class="btn-join" id="promoJoin" href="#" target="_blank" rel="noopener" style="display:none">Rejoindre le cercle</a>
+        </div>
       </div>
     </div>
   </div>
