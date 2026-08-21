@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rejoindre le Cercle — NyXia</title>
-<meta name="description" content="Crée ton espace dans le Cercle d'entraide NyXia. Partager, recommander, prospérer ensemble.">
+<meta name="description" content="Rejoins le Cercle d'entraide NyXia. Accompagnement réel, solutions prêtes à partager. 9 $/mois.">
 <link rel="icon" type="image/png" href="/FavIcon.png">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -34,30 +34,30 @@ h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(1.9rem,4vw,2.6
   box-shadow:0 20px 50px rgba(0,0,0,.35)}
 .card h2{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.55rem;color:#fff;margin-bottom:6px}
 .card .sub{font-size:.88rem;color:var(--t3);margin-bottom:18px}
-label{display:block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--t3);margin:12px 0 6px}
-input{
-  width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);
-  background:rgba(6,10,24,.6);color:#fff;font-family:Outfit,sans-serif;font-size:.95rem;outline:none
+.price-big{
+  font-family:'Cormorant Garamond',Georgia,serif;font-size:2.4rem;color:#fff;line-height:1;
+  margin:8px 0 4px
 }
-input:focus{border-color:var(--p)}
+.price-big span{font-size:1rem;color:var(--t3);font-family:Outfit,sans-serif;font-weight:500}
+.price-note{font-size:.85rem;color:var(--green);margin-bottom:18px}
+.btn{
+  display:block;width:100%;text-align:center;margin-top:8px;padding:15px 16px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-weight:700;font-size:1rem;
+  font-family:Outfit,sans-serif;box-shadow:0 6px 20px rgba(123,92,255,.35);text-decoration:none
+}
+.btn:hover{filter:brightness(1.06)}
+.btn-ghost{
+  display:block;width:100%;text-align:center;margin-top:10px;padding:12px 16px;border-radius:12px;
+  background:transparent;border:1px solid var(--border);color:var(--t2);font-size:.9rem;text-decoration:none
+}
 .ref-box{
-  margin-top:8px;padding:10px 12px;border-radius:12px;background:rgba(123,92,255,.1);
+  margin-bottom:14px;padding:10px 12px;border-radius:12px;background:rgba(123,92,255,.1);
   border:1px dashed rgba(123,92,255,.35);font-size:.85rem;color:var(--pl)
 }
 .ref-box strong{color:#fff}
-.btn{
-  width:100%;margin-top:18px;padding:13px 16px;border:none;border-radius:12px;cursor:pointer;
-  background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-weight:700;font-size:.95rem;
-  font-family:Outfit,sans-serif;box-shadow:0 6px 20px rgba(123,92,255,.35)
-}
-.btn:disabled{opacity:.55;cursor:not-allowed}
-.msg{margin-top:12px;font-size:.88rem;display:none}
-.msg.ok{display:block;color:var(--green)}
-.msg.err{display:block;color:#ff7b8a}
 .foot{margin-top:16px;text-align:center;font-size:.85rem;color:var(--t3)}
 .foot a{color:var(--pl)}
-.price{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:8px 14px;border-radius:50px;
-  background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:var(--green);font-size:.85rem;font-weight:600}
+.secure{margin-top:14px;font-size:.78rem;color:var(--t3);text-align:center}
 </style>
 </head>
 <body>
@@ -67,36 +67,32 @@ input:focus{border-color:var(--p)}
   <div>
     <a class="brand" href="/repertoire.html"><img src="/NyXia.png" alt="NyXia"><span>Cercle NyXia</span></a>
     <h1>Rejoins le cercle d'entraide</h1>
-    <p class="lead">Partager · Recommander · Prospérer ensemble — sans vente dure, avec un vrai accompagnement.</p>
-    <p class="note">Diane, NyXia et Éric t'accompagnent. Success RoadMap, terrain vivant, esprit d'entraide.</p>
+    <p class="lead">Partager · Recommander · Prospérer ensemble — avec un vrai accompagnement, pas une affiliation froide.</p>
+    <p class="note">Diane, NyXia et Éric t'accompagnent. Success RoadMap, solutions déjà prêtes, terrain vivant.</p>
     <ul class="bullets">
       <li>Formation et support pour bâtir ton cercle</li>
-      <li>Terrain d'entraînement vivant (communauté intéressée)</li>
-      <li>Sans créer de produit ni d'audience au départ</li>
+      <li>Solutions NyXia prêtes à partager (rien à créer)</li>
+      <li>Terrain d'entraînement vivant pour t'exercer sans te forcer à « vendre »</li>
     </ul>
-    <div class="price">9 $ / mois · résiliable à tout moment</div>
   </div>
 
   <div class="card">
-    <h2>Créer mon espace</h2>
-    <p class="sub">Quelques secondes — puis ton tableau de bord.</p>
-
-    <label for="fullName">Prénom et nom</label>
-    <input id="fullName" type="text" autocomplete="name" placeholder="Ton prénom et nom" required>
-
-    <label for="email">Courriel</label>
-    <input id="email" type="email" autocomplete="email" placeholder="toi@email.com" required>
-
-    <label for="password">Mot de passe</label>
-    <input id="password" type="password" autocomplete="new-password" placeholder="Minimum 6 caractères" required>
+    <h2>Accès promoteur</h2>
+    <p class="sub">Ce n'est pas gratuit — c'est un accompagnement réel, à un prix accessible.</p>
 
     <div class="ref-box" id="refBox" style="display:none">
-      Code de parrainage : <strong id="refLabel">—</strong>
+      Tu arrives via le lien de : <strong id="refLabel">—</strong>
     </div>
-    <input type="hidden" id="ref">
 
-    <button type="button" class="btn" id="btn" onclick="submitSignup()">Rejoindre le Cercle</button>
-    <div class="msg" id="msg"></div>
+    <div class="price-big">9 $<span> / mois</span></div>
+    <p class="price-note">Résiliable à tout moment</p>
+
+    <!-- Paiement Systeme.io — pas d'inscription gratuite -->
+    <a class="btn" id="payBtn" href="https://www.publication-web.com/nyxia/promoteurs">
+      Continuer vers le paiement sécurisé →
+    </a>
+
+    <p class="secure">Paiement sécurisé via Systeme.io · accès après confirmation</p>
     <p class="foot">Déjà un espace ? <a href="/login.html">Connexion</a></p>
   </div>
 </div>
@@ -105,58 +101,14 @@ input:focus{border-color:var(--p)}
 (function(){
   var params = new URLSearchParams(location.search);
   var ref = (params.get('ref') || params.get('code') || '').trim().toUpperCase();
+  var pay = document.getElementById('payBtn');
+  var base = 'https://www.publication-web.com/nyxia/promoteurs';
   if (ref) {
-    document.getElementById('ref').value = ref;
     document.getElementById('refLabel').textContent = ref;
     document.getElementById('refBox').style.display = 'block';
+    // Passe le code de parrainage si Systeme.io le lit en query (adaptable)
+    pay.href = base + (base.indexOf('?') >= 0 ? '&' : '?') + 'ref=' + encodeURIComponent(ref);
   }
-
-  window.submitSignup = async function(){
-    var btn = document.getElementById('btn');
-    var msg = document.getElementById('msg');
-    var fullName = document.getElementById('fullName').value.trim();
-    var email = document.getElementById('email').value.trim();
-    var password = document.getElementById('password').value;
-    var referralCode = document.getElementById('ref').value.trim();
-
-    msg.className = 'msg';
-    if (!fullName || !email || !password) {
-      msg.textContent = 'Remplis tous les champs.';
-      msg.className = 'msg err';
-      return;
-    }
-    if (password.length < 6) {
-      msg.textContent = 'Mot de passe : 6 caractères minimum.';
-      msg.className = 'msg err';
-      return;
-    }
-    btn.disabled = true;
-    try {
-      var r = await fetch('/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fullName: fullName, email: email, password: password, referralCode: referralCode })
-      });
-      var data = await r.json().catch(function(){ return {}; });
-      if (!r.ok || data.error) {
-        msg.textContent = data.error || ('Erreur ' + r.status);
-        msg.className = 'msg err';
-        btn.disabled = false;
-        return;
-      }
-      if (data.token) sessionStorage.setItem('nyxia_token', data.token);
-      msg.textContent = 'Bienvenue dans le Cercle ✦';
-      msg.className = 'msg ok';
-      // Tableau ambassadeur / promo — page à brancher ensuite
-      setTimeout(function(){
-        location.href = '/dashbord.html';
-      }, 600);
-    } catch (e) {
-      msg.textContent = 'Réseau indisponible. Réessaie.';
-      msg.className = 'msg err';
-      btn.disabled = false;
-    }
-  };
 })();
 </script>
 </body>
