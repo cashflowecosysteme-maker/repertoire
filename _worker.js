@@ -282,6 +282,91 @@ async function handlePublicRepertoire(request, env) {
   }
 }
 
+// ───────────── HELPDESK PUBLIC (NyXia · OpenRouter) ─────────────
+// Chat d'accueil PUBLIC du Répertoire — aucune session requise.
+// Persona NyXia, orienté aide + conversion douce vers « Demander mon espace ».
+// Réutilise OPENROUTER_MODEL / OPENROUTER_FALLBACK_MODEL / retrieveBrain / json déjà définis.
+const HELPDESK_SYSTEM = `Tu es **NyXia**, l'accueil vivant du **Répertoire du Cercle NyXia**.
+Tu parles à une personne qui visite le Répertoire : elle a peut-être une entreprise en ligne et cherche soit un produit digital, soit à rendre sa propre offre visible et à créer son équipe.
+
+TON RÔLE : accueillir, rassurer, répondre simplement aux questions sur le Répertoire et le Cercle, et guider avec chaleur vers l'action.
+
+L'ESPRIT DU CERCLE (jamais de MLM, de paliers, de vente dure) : partager, recommander, prospérer ensemble. Chacun gagne à aider les autres à réussir.
+
+CE QUE TU PEUX EXPLIQUER SIMPLEMENT :
+- Le Répertoire réunit des produits digitaux partagés par la communauté.
+- Toute personne (peu importe son genre) qui a une entreprise en ligne peut y rendre son offre visible et créer son équipe.
+- Pour obtenir son espace, on écrit à l'équipe via Messenger : https://m.me/LeMiroirdeNyXia
+
+RÈGLES :
+- Tutoiement, chaleureux, français de France. Appelle la personne par son prénom si elle te le donne.
+- Réponses COURTES (2 à 5 phrases), une idée à la fois, zéro jargon technique.
+- Tu n'es jamais « une IA » ni « un robot » : tu es NyXia, une présence.
+- Dès que la personne montre de l'intérêt pour avoir son espace / vendre / rejoindre, invite-la naturellement à écrire via Messenger (le lien ci-dessus). Jamais insistante.
+- N'invente jamais de prix, de chiffres ni de promesses. Si tu ne sais pas, propose d'en parler avec l'équipe via Messenger.
+- Vocabulaire : entraide, partage, cercle, équipe, marraine ou parrain — jamais vente/commission/MLM/recruter/filleul.`;
+
+async function handleHelpdesk(request, env) {
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Requête invalide.' }, 400); }
+
+  const message = String(body.message || '').slice(0, 2000);
+  if (!message.trim()) return json({ error: 'Message vide.' }, 400);
+
+  // Historique limité (coût maîtrisé pour un endpoint public)
+  const history = Array.isArray(body.history)
+    ? body.history
+        .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+        .slice(-10)
+    : [];
+
+  let systemPrompt = HELPDESK_SYSTEM;
+
+  // Cohérence avec l'univers : on pioche un peu dans le cerveau NyXia si disponible.
+  try {
+    const brain = await retrieveBrain(env, 'nyxia', message, 4);
+    if (brain) systemPrompt += `\n\n🔮 MÉMOIRE DE L'UNIVERS (pour rester cohérente, sans réciter ni citer de numéros) :\n\n${brain}`;
+  } catch (e) { /* le chat continue même si le cerveau est indisponible */ }
+
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    ...history,
+    { role: 'user', content: message }
+  ];
+
+  const apiKey = env.OPENROUTER_API_KEY || env.AI_API_KEY;
+  if (!apiKey) return json({ content: 'Je reviens dans un instant 💜 (petite configuration en cours).' });
+
+  async function callModel(model) {
+    return await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://repertoire.nyxia.top',
+        'X-Title': 'NyXia — Répertoire (Helpdesk)'
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        max_tokens: 1200,
+        reasoning: { enabled: false }
+      })
+    });
+  }
+
+  try {
+    let resp = await callModel(OPENROUTER_MODEL);
+    if (!resp.ok) resp = await callModel(OPENROUTER_FALLBACK_MODEL);
+    if (!resp.ok) return json({ content: 'Petite interruption dans le miroir… réessaie dans un instant 💜' });
+    const data = await resp.json();
+    const content = data.choices?.[0]?.message?.content || 'Je t\'écoute 💜';
+    return json({ content });
+  } catch (e) {
+    return json({ content: 'Petite interruption dans le miroir… réessaie dans un instant 💜' });
+  }
+}
+
 export default {
   async fetch(request, env) {
     
@@ -298,6 +383,7 @@ const url = new URL(request.url);
       if (path === '/api/check-auth' && request.method === 'POST') return await handleCheckAuth(request, env);
       if (path === '/api/logout' && request.method === 'POST') return await handleLogout(request, env);
       if ((path === '/api/repertoire' || path === '/api/marketplace/public') && request.method === 'GET') return await handlePublicRepertoire(request, env);
+      if (path === '/api/helpdesk' && request.method === 'POST') return await handleHelpdesk(request, env);
       if (path === '/api/products' && request.method === 'GET') return await handleListProducts(request, env);
       if (path === '/api/products' && request.method === 'POST') return await handleCreateProduct(request, env);
       if (path === '/api/chat' && request.method === 'POST') return await handleChat(request, env);
