@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Produit — Répertoire NyXia</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#0A1628;--p:#7B5CFF;--p2:#5A6CFF;--t:#fff;--t2:#D6D9F0;--t3:#8891B8;--green:#00E676}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Outfit,sans-serif;background:var(--bg1);color:var(--t2);padding:28px;min-height:100vh}
+.wrap{max-width:720px;margin:0 auto}
+a{color:#a78bfa;text-decoration:none}
+.card{background:rgba(123,92,255,.06);border:1px solid rgba(123,92,255,.15);border-radius:18px;padding:24px;margin-top:16px}
+h1{font-family:'Space Grotesk',sans-serif;font-size:26px;color:#fff;margin-bottom:8px}
+.price{font-size:22px;color:var(--green);font-weight:700;margin:12px 0}
+.sub{color:var(--t3);font-size:14px;line-height:1.55}
+.btn{display:inline-block;margin-top:16px;padding:12px 18px;border-radius:12px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-weight:600;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/repertoire.html">← Retour au répertoire</a>
+  <div class="card" id="box">Chargement…</div>
+</div>
+<script>
+var id = new URLSearchParams(location.search).get('id') || '';
+fetch('/api/repertoire').then(function(r){return r.json()}).then(function(data){
+  var list = data.products || [];
+  var p = list.find(function(x){ return String(x.id) === String(id); });
+  var box = document.getElementById('box');
+  if (!p) { box.innerHTML = '<p class="sub">Produit introuvable ou non publié.</p>'; return; }
+  var price = Number(p.price||0).toLocaleString('fr-CA',{minimumFractionDigits:2,maximumFractionDigits:2})+' $';
+  box.innerHTML = '<h1></h1><p class="sub" id="d"></p><div class="price"></div>';
+  box.querySelector('h1').textContent = p.title || '';
+  box.querySelector('#d').textContent = p.description_short || '';
+  box.querySelector('.price').textContent = price;
+  if (p.affiliate_link) {
+    var a = document.createElement('a');
+    a.className = 'btn'; a.href = p.affiliate_link; a.textContent = 'Accéder à l’offre';
+    box.appendChild(a);
+  }
+}).catch(function(){ document.getElementById('box').textContent = 'Erreur de chargement.'; });
+</script>
+</body>
+</html>
