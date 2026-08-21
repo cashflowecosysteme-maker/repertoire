@@ -2,76 +2,202 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Répertoire — NyXia</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Répertoire NyXia — Les offres du cercle d'entraide</title>
+<meta name="description" content="Explore les produits et offres du cercle d'entraide NyXia. Choisis, partage, grandis ensemble.">
 <link rel="icon" type="image/png" href="/FavIcon.png">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg1:#0A1628; --card:rgba(123,92,255,.06); --border:rgba(123,92,255,.15);
-  --p:#7B5CFF; --p2:#5A6CFF; --t:#fff; --t2:#D6D9F0; --t3:#8891B8; --t4:#4a5278; --green:#00E676; --gold:#F4C842;
+  --bg-deep:#060a18;--bg-card:#0e1430;--bg-card-hover:#141b3d;
+  --primary:#7B5CFF;--secondary:#5A6CFF;--primary-light:#a78bfa;
+  --primary-glow:rgba(123,92,255,.35);--gold:#F4C842;--green:#34d399;
+  --text:#f1f0ff;--text-secondary:#b9b3d6;--text-muted:#7c73a0;
+  --border:rgba(123,92,255,.18);--radius:16px;--radius-sm:9px;
+  --transition:.3s cubic-bezier(.4,0,.2,1);
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{min-height:100%;background:var(--bg1);color:var(--t2);font-family:Outfit,sans-serif}
+html{scroll-behavior:smooth}
+body{font-family:Outfit,-apple-system,sans-serif;background:var(--bg-deep);color:var(--text);line-height:1.6;min-height:100vh;overflow-x:hidden}
+a{color:var(--primary-light);text-decoration:none;transition:color var(--transition)}
+a:hover{color:#fff}
+img{max-width:100%;display:block}
+button{cursor:pointer;font-family:inherit;border:none;outline:none}
+.hero h1,.section-title,.card-title,.empty-state h3{
+  font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;letter-spacing:.3px;
+}
 #starry-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
-.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:28px 20px 60px}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:28px}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:700}
-.brand-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--p2));display:flex;align-items:center;justify-content:center;font-size:16px}
-h1{font-family:'Space Grotesk',sans-serif;font-size:28px;color:#fff;margin-bottom:6px}
-.sub{color:var(--t3);font-size:14px;margin-bottom:22px;line-height:1.5;max-width:560px}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;align-items:center}
-input[type="search"]{
-  flex:1;min-width:200px;padding:12px 16px;border-radius:50px;border:1px solid rgba(123,92,255,.25);
-  background:rgba(15,28,63,.55);color:#fff;font-family:Outfit,sans-serif;font-size:14px;outline:none
+
+/* HEADER */
+.site-header{
+  position:relative;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 28px;border-bottom:1px solid rgba(123,92,255,.1);
+  backdrop-filter:blur(12px);background:rgba(6,10,24,.55);
 }
-.chip{padding:8px 14px;border-radius:50px;border:1px solid rgba(123,92,255,.2);background:transparent;color:var(--t3);font-size:12px;cursor:pointer;font-family:Outfit,sans-serif}
-.chip.active{background:rgba(123,92,255,.22);color:#fff;border-color:rgba(123,92,255,.45)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
-.card{
-  background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;
-  display:flex;flex-direction:column;transition:border-color .2s, transform .2s
+.brand{display:flex;align-items:center;gap:12px;color:#fff;font-weight:600;font-size:1rem}
+.brand img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(123,92,255,.45);box-shadow:0 0 20px rgba(123,92,255,.35)}
+.header-actions{display:flex;align-items:center;gap:10px}
+.btn-primary{
+  padding:9px 22px;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:#fff;font-size:.875rem;font-weight:600;
+  box-shadow:0 4px 15px var(--primary-glow);transition:all var(--transition);
 }
-.card:hover{border-color:rgba(123,92,255,.4);transform:translateY(-2px)}
-.thumb{
-  height:150px;background:rgba(15,28,63,.7);display:flex;align-items:center;justify-content:center;
-  color:var(--t4);font-size:32px;overflow:hidden
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 24px var(--primary-glow)}
+
+/* HERO — style Miroir / marketplace */
+.hero-wrap{
+  position:relative;z-index:1;
+  max-width:1100px;margin:0 auto;
+  padding:48px 24px 20px;
+  display:grid;grid-template-columns:minmax(220px,380px) 1fr;
+  gap:40px;align-items:center;
 }
-.thumb img{width:100%;height:100%;object-fit:cover}
-.body{padding:16px;display:flex;flex-direction:column;gap:8px;flex:1}
-.body h2{font-size:16px;color:#fff;font-weight:600;line-height:1.35}
-.body p{font-size:13px;color:var(--t3);line-height:1.45;flex:1}
-.price{font-family:'Space Grotesk',sans-serif;font-size:18px;color:var(--green);font-weight:700}
-.foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
-.btn{
-  padding:10px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:600;font-size:12px;
-  background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-family:Outfit,sans-serif;text-decoration:none;display:inline-block
+@media(max-width:860px){
+  .hero-wrap{grid-template-columns:1fr;text-align:center}
+  .hero-visual{order:-1;max-width:280px;margin:0 auto}
 }
-.btn-ghost{background:rgba(123,92,255,.12);border:1px solid rgba(123,92,255,.3)}
-.empty{text-align:center;padding:60px 16px;color:var(--t3);grid-column:1/-1}
-.empty strong{display:block;color:#fff;font-size:16px;margin-bottom:8px}
-.badge{font-size:11px;padding:3px 8px;border-radius:50px;background:rgba(244,200,66,.15);color:var(--gold)}
+.hero-visual img{
+  width:100%;height:auto;filter:drop-shadow(0 20px 50px rgba(123,92,255,.35));
+  animation:floatY 6s ease-in-out infinite;
+}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.pill-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 18px;border-radius:50px;
+  background:rgba(123,92,255,.12);border:1px solid rgba(123,92,255,.25);
+  color:var(--text-secondary);font-size:.875rem;margin-bottom:16px;
+}
+.hero-content h1{
+  font-size:clamp(1.9rem,4.2vw,2.9rem);line-height:1.15;margin-bottom:16px;
+  background:linear-gradient(135deg,#fff 30%,var(--primary-light));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-content p{color:var(--text-secondary);font-size:1.05rem;max-width:520px;margin-bottom:12px}
+.hero-content .muted{color:var(--text-muted);font-size:.95rem;font-style:italic;margin-bottom:22px}
+@media(max-width:860px){.hero-content p,.hero-content .muted{margin-left:auto;margin-right:auto}}
+
+/* SECTION */
+.products-section{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:28px 24px 80px}
+.section-title{
+  text-align:center;font-size:clamp(1.6rem,3vw,2.2rem);color:#fff;margin-bottom:8px;
+}
+.section-sub{text-align:center;color:var(--text-muted);font-size:.95rem;margin-bottom:28px;max-width:560px;margin-left:auto;margin-right:auto}
+
+.filter-bar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:28px;align-items:center}
+.filter-bar input{
+  min-width:220px;flex:1;max-width:360px;padding:12px 18px;border-radius:50px;
+  border:1px solid var(--border);background:rgba(14,20,48,.8);color:#fff;
+  font-family:Outfit,sans-serif;font-size:.9rem;outline:none;
+}
+.filter-bar input:focus{border-color:var(--primary)}
+.pill{
+  padding:8px 16px;border-radius:50px;background:rgba(123,92,255,.1);
+  border:1px solid var(--border);color:var(--text-secondary);font-size:.85rem;font-weight:500;
+  transition:all var(--transition);
+}
+.pill:hover,.pill.active{border-color:var(--primary);color:#fff;background:rgba(123,92,255,.22)}
+
+.product-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+}
+@media(max-width:960px){.product-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.product-grid{grid-template-columns:1fr}}
+
+.product-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;display:flex;flex-direction:column;
+  transition:all var(--transition);animation:card-in .5s ease-out both;
+}
+.product-card:hover{
+  border-color:rgba(123,92,255,.4);background:var(--bg-card-hover);
+  transform:translateY(-4px);box-shadow:0 16px 40px rgba(123,92,255,.12);
+}
+@keyframes card-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.card-image-wrap{position:relative;aspect-ratio:16/10;overflow:hidden;background:#0a1028}
+.card-image-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .45s ease}
+.product-card:hover .card-image-wrap img{transform:scale(1.06)}
+.card-image-placeholder{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 30% 20%,rgba(123,92,255,.25),transparent 55%),#0a1028;
+}
+.card-image-placeholder img{width:72px;height:72px;border-radius:50%;object-fit:cover;opacity:.9;border:2px solid rgba(123,92,255,.35)}
+.card-badge{
+  position:absolute;top:12px;left:12px;padding:4px 10px;border-radius:50px;
+  background:rgba(244,200,66,.15);border:1px solid rgba(244,200,66,.35);
+  color:var(--gold);font-size:.7rem;font-weight:600;
+}
+.card-body{padding:18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card-title{font-size:1.2rem;color:#fff;line-height:1.25}
+.card-desc{font-size:.88rem;color:var(--text-secondary);line-height:1.45;flex:1}
+.card-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+.card-price{font-family:'Space Grotesk',Outfit,sans-serif;font-size:1.15rem;font-weight:700;color:var(--green)}
+.card-cta{
+  display:inline-flex;align-items:center;justify-content:center;
+  margin-top:10px;padding:11px 16px;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:#fff;font-size:.85rem;font-weight:600;text-align:center;
+  box-shadow:0 4px 14px var(--primary-glow);transition:all var(--transition);
+}
+.card-cta:hover{transform:translateY(-1px);box-shadow:0 6px 20px var(--primary-glow);color:#fff}
+
+.empty-state{text-align:center;padding:70px 20px;grid-column:1/-1;color:var(--text-muted)}
+.empty-state h3{color:#fff;font-size:1.4rem;margin-bottom:8px}
+.empty-state img{width:80px;height:80px;border-radius:50%;margin:0 auto 16px;opacity:.85;border:2px solid rgba(123,92,255,.3)}
+
+.footer{
+  position:relative;z-index:1;text-align:center;padding:28px 16px 40px;
+  border-top:1px solid rgba(123,92,255,.1);color:var(--text-muted);font-size:.85rem;
+}
+.footer strong{color:var(--primary-light)}
 </style>
 </head>
 <body>
 <canvas id="starry-canvas"></canvas>
-<div class="wrap">
-  <header>
-    <a class="brand" href="/repertoire.html"><span class="brand-mark">✦</span> Répertoire NyXia</a>
-  </header>
 
-  <h1>Répertoire</h1>
-  <p class="sub">Les produits du cercle d’entraide. Explore, choisis, partage — simplement.</p>
+<header class="site-header">
+  <a class="brand" href="/repertoire.html">
+    <img src="/NyXia.png" alt="NyXia" width="40" height="40">
+    <span>Répertoire NyXia</span>
+  </a>
+  <div class="header-actions">
+    <a class="btn-primary" href="#offres">Voir les offres</a>
+  </div>
+</header>
 
-  <div class="toolbar">
-    <input type="search" id="q" placeholder="Rechercher un produit…" oninput="render()">
-    <button type="button" class="chip active" data-f="all" onclick="setFilter('all', this)">Tous</button>
+<section class="hero-wrap">
+  <div class="hero-visual">
+    <img src="/NyXia.png" alt="NyXia — emblème">
+  </div>
+  <div class="hero-content">
+    <div class="pill-badge">✦ Cercle d'entraide · partages &amp; offres</div>
+    <h1>Des offres qui font grandir le cercle</h1>
+    <p>Explore le répertoire : formations, outils, accompagnements et créations partagés par la communauté NyXia.</p>
+    <p class="muted">Pas de catalogue froid — un espace vivant où chacun peut découvrir, partager et soutenir les autres.</p>
+    <a class="btn-primary" href="#offres">Découvrir le répertoire →</a>
+  </div>
+</section>
+
+<section class="products-section" id="offres">
+  <h2 class="section-title">Le répertoire</h2>
+  <p class="section-sub">Tous les produits publiés du cercle. Cherche, ouvre, partage.</p>
+
+  <div class="filter-bar">
+    <input type="search" id="q" placeholder="Rechercher une offre…" oninput="render()">
+    <button type="button" class="pill active" data-f="all" onclick="setFilter('all',this)">Tous</button>
   </div>
 
-  <div class="grid" id="grid">
-    <div class="empty">Chargement du répertoire…</div>
+  <div class="product-grid" id="grid">
+    <div class="empty-state"><p>Chargement du répertoire…</p></div>
   </div>
-</div>
+</section>
+
+<footer class="footer">
+  Propulsé par <strong>NyXia</strong> · Cercle d'entraide
+</footer>
 
 <script src="/starry-bg.js" defer></script>
 <script>
@@ -81,9 +207,12 @@ var FILTER = 'all';
 function money(n) {
   return Number(n || 0).toLocaleString('fr-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $';
 }
+function escapeHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 function setFilter(f, el) {
   FILTER = f;
-  document.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
+  document.querySelectorAll('.pill').forEach(function (c) { c.classList.remove('active'); });
   if (el) el.classList.add('active');
   render();
 }
@@ -91,44 +220,41 @@ function render() {
   var q = (document.getElementById('q').value || '').toLowerCase().trim();
   var list = ALL.filter(function (p) {
     if (!q) return true;
-    var t = (p.title || '') + ' ' + (p.description_short || '');
-    return t.toLowerCase().indexOf(q) >= 0;
+    return ((p.title || '') + ' ' + (p.description_short || '')).toLowerCase().indexOf(q) >= 0;
   });
   var grid = document.getElementById('grid');
   if (!list.length) {
-    grid.innerHTML = '<div class="empty"><strong>Aucun produit pour le moment</strong>Les offres publiées apparaîtront ici.</div>';
+    grid.innerHTML =
+      '<div class="empty-state">' +
+        '<img src="/NyXia.png" alt="NyXia">' +
+        '<h3>Aucune offre pour le moment</h3>' +
+        '<p>Les produits publiés par le cercle apparaîtront ici.</p>' +
+      '</div>';
     return;
   }
-  grid.innerHTML = list.map(function (p) {
-    var img = p.image_url
-      ? '<img src="' + escapeAttr(p.image_url) + '" alt="">'
-      : '✦';
-    var desc = (p.description_short || '').slice(0, 120);
-    var promo = p.promo_code ? '<span class="badge">' + escapeHtml(p.promo_code) + '</span>' : '';
+  grid.innerHTML = list.map(function (p, i) {
     var href = p.affiliate_link || ('/produit.html?id=' + encodeURIComponent(p.id));
+    var img = p.image_url
+      ? '<img src="' + escapeHtml(p.image_url) + '" alt="">'
+      : '<div class="card-image-placeholder"><img src="/NyXia.png" alt="NyXia"></div>';
+    var badge = p.promo_code
+      ? '<span class="card-badge">' + escapeHtml(p.promo_code) + '</span>'
+      : '';
+    var desc = (p.description_short || '').slice(0, 140);
     return (
-      '<article class="card">' +
-        '<div class="thumb">' + img + '</div>' +
-        '<div class="body">' +
-          '<h2>' + escapeHtml(p.title || 'Sans titre') + '</h2>' +
-          '<p>' + escapeHtml(desc) + (desc.length >= 120 ? '…' : '') + '</p>' +
-          '<div class="foot">' +
-            '<div class="price">' + money(p.price) + '</div>' + promo +
-          '</div>' +
-          '<div class="foot">' +
-            '<a class="btn" href="' + escapeAttr(href) + '">Voir</a>' +
-          '</div>' +
+      '<article class="product-card" style="animation-delay:' + (i * 0.05) + 's">' +
+        '<div class="card-image-wrap">' + img + badge + '</div>' +
+        '<div class="card-body">' +
+          '<h3 class="card-title">' + escapeHtml(p.title || 'Sans titre') + '</h3>' +
+          '<p class="card-desc">' + escapeHtml(desc) + (desc.length >= 140 ? '…' : '') + '</p>' +
+          '<div class="card-meta"><span class="card-price">' + money(p.price) + '</span></div>' +
+          '<a class="card-cta" href="' + escapeHtml(href) + '">Découvrir →</a>' +
         '</div>' +
       '</article>'
     );
   }).join('');
 }
-function escapeHtml(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function escapeAttr(s) {
-  return escapeHtml(s).replace(/'/g, '&#39;');
-}
+
 fetch('/api/repertoire')
   .then(function (r) { return r.json(); })
   .then(function (data) {
@@ -137,7 +263,7 @@ fetch('/api/repertoire')
   })
   .catch(function () {
     document.getElementById('grid').innerHTML =
-      '<div class="empty"><strong>Répertoire indisponible</strong>Réessaie dans un instant.</div>';
+      '<div class="empty-state"><img src="/NyXia.png" alt="NyXia"><h3>Répertoire indisponible</h3><p>Réessaie dans un instant.</p></div>';
   });
 </script>
 </body>
