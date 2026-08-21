@@ -210,11 +210,12 @@ async function verifyPassword(password, salt, hash) {
 
 // ───────────── MARKETPLACE PRODUITS (D1) ─────────────
 async function handleListProducts(request, env) {
+  if (env.DB) await ensureMarketplaceBillingColumns(env);
   if (!env.DB) return json({ products: [] });
   try {
     await ensureSchema(env);
     const { results } = await env.DB.prepare(
-      `SELECT id, title, description_short, price, status, image_url, promo_code, commission_n1, commission_n2, commission_n3, created_at
+      `SELECT id, title, description_short, price, price_monthly, billing_type, status, image_url, promo_code, commission_n1, commission_n2, commission_n3, created_at
        FROM marketplace_products ORDER BY created_at DESC LIMIT 200`
     ).all();
     return json({ products: results || [] });
@@ -224,7 +225,15 @@ async function handleListProducts(request, env) {
   }
 }
 
+
+async function ensureMarketplaceBillingColumns(env) {
+  if (!env.DB) return;
+  try { await env.DB.prepare(`ALTER TABLE marketplace_products ADD COLUMN price_monthly REAL DEFAULT 0`).run(); } catch (_) {}
+  try { await env.DB.prepare(`ALTER TABLE marketplace_products ADD COLUMN billing_type TEXT DEFAULT 'one_time'`).run(); } catch (_) {}
+}
+
 async function handleCreateProduct(request, env) {
+  if (env.DB) await ensureMarketplaceBillingColumns(env);
   if (!env.DB) return json({ error: 'Base non configurée.' }, 500);
   const body = await request.json().catch(() => ({}));
   const token = body.token || request.headers.get('X-Cercle-Token');
@@ -243,8 +252,8 @@ async function handleCreateProduct(request, env) {
   await ensureSchema(env);
   await env.DB.prepare(
     `INSERT INTO marketplace_products
-     (id, seller_id, title, description_short, image_url, price, commission_n1, commission_n2, commission_n3, affiliate_link, promo_code, status, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+     (id, seller_id, title, description_short, image_url, price, price_monthly, billing_type, commission_n1, commission_n2, commission_n3, affiliate_link, promo_code, status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     id,
     sellerId,
@@ -252,6 +261,10 @@ async function handleCreateProduct(request, env) {
     (body.description || body.description_short || '').trim(),
     (body.imageUrl || body.image_url || '').trim() || null,
     Number(body.price || 0),
+    Number(body.price_monthly || body.priceMonthly || 0),
+    (['one_time','subscription','both'].includes(String(body.billing_type || body.billingType || ''))
+      ? String(body.billing_type || body.billingType)
+      : 'one_time'),
     body.commission_n1 != null ? Number(body.commission_n1) : null,
     body.commission_n2 != null ? Number(body.commission_n2) : null,
     body.commission_n3 != null ? Number(body.commission_n3) : null,
@@ -265,17 +278,59 @@ async function handleCreateProduct(request, env) {
 }
 
 
+
+async function handleGetProduct(request, env, url) {
+  if (!env.DB) return json({ error: 'DB absente' }, 500);
+  await ensureMarketplaceBillingColumns(env);
+  const id = (url.searchParams.get('id') || '').trim();
+  if (!id) return json({ error: 'id requis' }, 400);
+  try {
+    let row;
+    try {
+      row = await env.DB.prepare(
+        `SELECT id, title, description_short, description_long, price, price_monthly, billing_type, image_url, promo_code, affiliate_link, status, created_at
+         FROM marketplace_products WHERE id = ? LIMIT 1`
+      ).bind(id).first();
+    } catch (e) {
+      row = await env.DB.prepare(
+        `SELECT id, title, description_short, description_long, price, image_url, promo_code, affiliate_link, status, created_at
+         FROM marketplace_products WHERE id = ? LIMIT 1`
+      ).bind(id).first();
+    }
+    if (!row) return json({ error: 'Produit introuvable' }, 404);
+    if (row.status !== 'active' && row.status !== 'published') {
+      return json({ error: 'Produit non publié' }, 404);
+    }
+    return json({ product: row });
+  } catch (e) {
+    return json({ error: String(e.message || e) }, 500);
+  }
+}
+
 async function handlePublicRepertoire(request, env) {
-  if (!env.DB) return json({ products: [] });
+  if (!env.DB) return json({ products: [], error: 'DB absente' });
   try {
     await ensureSchema(env);
-    const { results } = await env.DB.prepare(
-      `SELECT id, title, description_short, price, image_url, status, promo_code, affiliate_link, created_at
-       FROM marketplace_products
-       WHERE status = 'active' OR status = 'published'
-       ORDER BY created_at DESC LIMIT 200`
-    ).all();
-    return json({ products: results || [] });
+    await ensureMarketplaceBillingColumns(env);
+    let results = [];
+    try {
+      const r = await env.DB.prepare(
+        `SELECT id, title, description_short, price, price_monthly, billing_type, image_url, status, promo_code, affiliate_link, created_at
+         FROM marketplace_products
+         WHERE status = 'active' OR status = 'published'
+         ORDER BY created_at DESC LIMIT 200`
+      ).all();
+      results = r.results || [];
+    } catch (e1) {
+      const r = await env.DB.prepare(
+        `SELECT id, title, description_short, price, image_url, status, promo_code, affiliate_link, created_at
+         FROM marketplace_products
+         WHERE status = 'active' OR status = 'published'
+         ORDER BY created_at DESC LIMIT 200`
+      ).all();
+      results = r.results || [];
+    }
+    return json({ products: results });
   } catch (e) {
     console.error('repertoire', e);
     return json({ products: [], error: String(e.message || e) });
@@ -480,21 +535,35 @@ async function handleSystemeWebhook(request, env) {
   }
 
   const body = await request.json().catch(() => ({}));
-  // Systeme.io envoie souvent : email, first_name / full_name, tags, product, price, contact...
+  // Systeme.io : le courriel est souvent dans data.customer.email
+  const data = body.data || body.payload || body;
+  const customer = (data && data.customer) || body.customer || (data && data.contact) || body.contact || {};
   const email = String(
-    body.email || (body.contact && body.contact.email) || body.customer_email || ''
+    (customer && customer.email) ||
+    body.email ||
+    (body.contact && body.contact.email) ||
+    body.customer_email ||
+    (data && data.email) ||
+    ''
   ).trim().toLowerCase();
   const fullName = String(
+    (customer && (customer.full_name || customer.name)) ||
+    [customer && (customer.first_name || customer.firstname), customer && (customer.last_name || customer.lastname)].filter(Boolean).join(' ') ||
     body.full_name || body.fullName || body.first_name ||
-    (body.contact && (body.contact.name || body.contact.first_name)) || 'Membre'
+    (body.contact && (body.contact.name || body.contact.first_name)) ||
+    (data && data.first_name) ||
+    'Membre'
   ).trim();
   const referralCode = String(
-    body.ref || body.referral_code || body.affiliate_code || body.parrain || ''
+    body.ref || (data && data.ref) || body.referral_code || (data && data.referral_code) ||
+    body.affiliate_code || body.parrain || (customer && customer.ref) || ''
   ).trim().toUpperCase();
   const product = String(
-    body.product || body.product_name || body.offer || body.tag || ''
+    body.product || (data && data.product) || body.product_name || (data && data.product_name) ||
+    body.offer || (data && data.offer) || body.tag || (data && data.tag) ||
+    (data && data.price_item && data.price_item.name) || ''
   ).toLowerCase();
-  const event = String(body.event || body.type || body.action || 'purchase').toLowerCase();
+  const event = String(body.event || (data && data.event) || body.type || body.action || 'purchase').toLowerCase();
 
   if (!email) return json({ error: 'email manquant' }, 400);
   if (!env.DB) return json({ error: 'DB absente' }, 500);
@@ -504,14 +573,15 @@ async function handleSystemeWebhook(request, env) {
   // Upsell Éric 30 jours — réserve (page produit pas encore en ligne)
   const isEric30 = /eric|éric|30\s*j|mentor/.test(product) && /49|upsell|order.?bump/.test(product + event + JSON.stringify(body).toLowerCase());
   if (isEric30 || body.grant_eric_30 === true) {
-    const user = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();
-    const uid = user ? user.id : email;
-    if (env.CASHFLOW_KV) {
-      await env.CASHFLOW_KV.put('eric_access:' + uid, JSON.stringify({
-        email, granted_at: new Date().toISOString(), source: 'systeme'
-      }), { expirationTtl: 2592000 }); // 30 jours
+    let uid = null;
+    if (env.DB) {
+      try {
+        const user = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();
+        if (user) uid = user.id;
+      } catch (_) {}
     }
-    return json({ success: true, granted: 'eric_30', email });
+    await grantEricAccess(env, uid, email);
+    return json({ success: true, granted: 'eric_30', email, userId: uid });
   }
 
   // Achat / abo promoteur principal → compte affiliate
@@ -569,7 +639,7 @@ const url = new URL(request.url);
     const path = url.pathname;
 
     if (path === '/' || path === '') {
-      return Response.redirect(url.origin + '/repertoire.html', 302);
+      return env.ASSETS.fetch(new Request(new URL('/index.html', request.url), request));
     }
     // Lien de création d'équipe / parrainage → inscription
     if (path.startsWith('/r/')) {
@@ -583,9 +653,18 @@ const url = new URL(request.url);
       if (path === '/api/check-auth' && request.method === 'POST') return await handleCheckAuth(request, env);
       if (path === '/api/logout' && request.method === 'POST') return await handleLogout(request, env);
       if ((path === '/api/repertoire' || path === '/api/marketplace/public') && request.method === 'GET') return await handlePublicRepertoire(request, env);
+      if (path === '/api/product' && request.method === 'GET') return await handleGetProduct(request, env, url);
       if (path === '/api/helpdesk' && request.method === 'POST') return await handleHelpdesk(request, env);
       if (path === '/api/products' && request.method === 'GET') return await handleListProducts(request, env);
       if (path === '/api/products' && request.method === 'POST') return await handleCreateProduct(request, env);
+      if (path === '/api/eric/access' && request.method === 'POST') {
+        const body = await request.json().catch(() => ({}));
+        const token = body.token || '';
+        const session = await getSessionOrNull(token, env);
+        if (!session) return json({ ok: false, error: 'Session expirée.' }, 401);
+        const ok = await hasEricAccess(env, session);
+        return json({ ok, expired: !ok, renew_url: 'https://www.publication-web.com/nyxia/promoteurs' });
+      }
       if (path === '/api/chat' && request.method === 'POST') return await handleChat(request, env);
       if (path === '/api/studio-chat' && request.method === 'POST') return await handleStudioChat(request, env);
 
@@ -696,6 +775,8 @@ async function ensureSchema(env) {
       description_long TEXT,
       image_url TEXT,
       price REAL DEFAULT 0,
+      price_monthly REAL DEFAULT 0,
+      billing_type TEXT DEFAULT 'one_time',
       commission_n1 REAL,
       commission_n2 REAL,
       commission_n3 REAL,
@@ -818,6 +899,52 @@ async function handleLogout(request, env) {
 
 // ───────────── CHAT (NyXia + Alphas) ─────────────
 
+
+// ───────────── ACCÈS ÉRIC 30 JOURS (KV TTL) ─────────────
+// Clé : eric_access:{userId}  OU  eric_access:email:{email}
+// TTL KV = 2 592 000 s (30 j) → la clé disparaît seule ; on REFUSE le chat si absente.
+
+async function grantEricAccess(env, userId, email) {
+  if (!env.CASHFLOW_KV) return;
+  const payload = JSON.stringify({
+    email: email || null,
+    granted_at: new Date().toISOString(),
+    source: 'systeme'
+  });
+  const opts = { expirationTtl: 2592000 }; // 30 jours exacts
+  if (userId) await env.CASHFLOW_KV.put('eric_access:' + userId, payload, opts);
+  if (email) await env.CASHFLOW_KV.put('eric_access:email:' + String(email).toLowerCase(), payload, opts);
+}
+
+async function hasEricAccess(env, session) {
+  if (!env.CASHFLOW_KV || !session) return false;
+  // Super admin / admin : toujours OK
+  if (session.role === 'admin' || session.role === 'superadmin' || session.isAdmin) return true;
+  const uid = session.userId || session.id || null;
+  const email = (session.email || '').toLowerCase();
+  if (uid) {
+    const byId = await env.CASHFLOW_KV.get('eric_access:' + uid);
+    if (byId) return true;
+  }
+  if (email) {
+    const byEmail = await env.CASHFLOW_KV.get('eric_access:email:' + email);
+    if (byEmail) return true;
+  }
+  return false;
+}
+
+async function requireEricAccess(env, session) {
+  const ok = await hasEricAccess(env, session);
+  if (ok) return null;
+  return json({
+    error: 'eric_access_expired',
+    content: 'Ton accompagnement avec Éric de 30 jours est terminé. Pour continuer, réactive l’upsell Éric — je reste disponible dès que c’est fait 🔥',
+    expired: true,
+    renew_url: 'https://www.publication-web.com/nyxia/promoteurs'
+  }, 403);
+}
+
+
 async function handleChat(request, env) {
   const { message, history, userName, agent, attachment, token } = await request.json();
 
@@ -825,6 +952,13 @@ async function handleChat(request, env) {
   if (!token) return json({ error: 'Session manquante.' }, 401);
   const sessionRaw = await env.CASHFLOW_KV.get(`session:${token}`);
   if (!sessionRaw) return json({ error: 'Session expirée. Reconnecte-toi.' }, 401);
+
+  let sessionObj = {};
+  try { sessionObj = JSON.parse(sessionRaw); } catch (_) {}
+  if (String(agent || '').toLowerCase() === 'eric') {
+    const blocked = await requireEricAccess(env, sessionObj);
+    if (blocked) return blocked;
+  }
 
   let systemPrompt = (SYSTEM_PROMPTS[agent] || SYSTEM_PROMPTS.nyxia)
     .replace(/\{first_name\}/g, userName || 'toi');
@@ -1183,8 +1317,44 @@ async function handleAdminCreateClient(request, env) {
   if (String(body.password).length < 6) return json({ error: 'Mot de passe : minimum 6 caractères.' }, 400);
 
   try {
-    const existing = await env.CASHFLOW_KV.get(`client:${email}`);
-    if (existing) return json({ error: 'Ce courriel existe déjà.' }, 400);
+    const existingRaw = await env.CASHFLOW_KV.get(`client:${email}`);
+    const newProducts = Array.isArray(body.products) ? body.products.filter(Boolean) : [];
+
+    // 1 courriel = 1 client : si déjà là, on AJOUTE les produits (pas d'erreur)
+    if (existingRaw) {
+      const client = JSON.parse(existingRaw);
+      const current = Array.isArray(client.products) ? client.products.slice() : [];
+      const added = [];
+      for (const p of newProducts) {
+        if (!current.map(String).includes(String(p))) {
+          current.push(p);
+          added.push(p);
+        }
+      }
+      client.products = current;
+      if (body.firstName) client.firstName = body.firstName;
+      if (body.lastName) client.lastName = body.lastName;
+      if (body.name) client.name = body.name;
+      if (body.password && String(body.password).length >= 6) {
+        const salt = randomSalt();
+        client.salt = salt;
+        client.passwordHash = await hashPassword(body.password, salt);
+        client.password = body.password;
+      }
+      client.updatedAt = new Date().toISOString();
+      client.active = true;
+      await env.CASHFLOW_KV.put(`client:${email}`, JSON.stringify(client));
+      return json({
+        success: true,
+        email,
+        merged: true,
+        products: client.products,
+        added,
+        message: added.length
+          ? 'Client existant : produit(s) ajouté(s).'
+          : 'Client déjà inscrit à ces produits.'
+      });
+    }
 
     const salt = randomSalt();
     const passwordHash = await hashPassword(body.password, salt);
@@ -1198,13 +1368,13 @@ async function handleAdminCreateClient(request, env) {
       passwordHash,
       salt,
       role: body.role || 'client',
-      products: Array.isArray(body.products) ? body.products : [],
+      products: newProducts,
       active: true,
       createdAt: new Date().toISOString()
     };
 
     await env.CASHFLOW_KV.put(`client:${email}`, JSON.stringify(client));
-    return json({ success: true, email, products: client.products });
+    return json({ success: true, email, products: client.products, merged: false });
   } catch (e) {
     console.error('handleAdminCreateClient', e);
     return json({ error: 'Erreur KV : ' + (e.message || String(e)) }, 500);
@@ -1907,6 +2077,10 @@ async function handleTTSNyxia(request, env) {
   const { token, text, agent } = await request.json();
   const session = await getSessionOrNull(token, env);
   if (!session) return json({ error: 'Session expirée.' }, 401);
+  if (String(agent || '').toLowerCase() === 'eric') {
+    const blocked = await requireEricAccess(env, session);
+    if (blocked) return blocked;
+  }
   if (!text) return json({ error: 'Texte requis.' }, 400);
 
   // Nettoyage défensif : retire tout caractère Unicode "brisé" (moitié d'emoji orpheline)
@@ -2041,3 +2215,6 @@ async function handleTTSCachedAudio(request, env, url) {
 
   return new Response(audio, { status: 200, headers: { 'Content-Type': 'audio/mpeg' } });
 }
+
+    try { await env.DB.prepare(`ALTER TABLE marketplace_products ADD COLUMN price_monthly REAL DEFAULT 0`).run(); } catch (_) {}
+    try { await env.DB.prepare(`ALTER TABLE marketplace_products ADD COLUMN billing_type TEXT DEFAULT 'one_time'`).run(); } catch (_) {}
