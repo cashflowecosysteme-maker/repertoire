@@ -3,28 +3,18 @@ main = "_worker.js"
 compatibility_date = "2026-07-01"
 compatibility_flags = ["nodejs_compat"]
 
-# ── Pages HTML + assets statiques servis automatiquement ──
 [assets]
 directory = "."
 binding = "ASSETS"
 
-# ── D1 : LA MÊME base que l'affiliation (on ne casse rien, on lit/écrit l'existant) ──
+[[kv_namespaces]]
+binding = "CASHFLOW_KV"
+id = "106db6da016d49d2b480452f19bad695"
+
 [[d1_databases]]
-binding = "DB_AFFILIATION"
-database_name = "affiliation-pro-db"
-database_id = "0b22a4ba-4d5f-404d-b2e0-4838de6b1822"
+binding = "DB"
+database_name = "nyxia-cercles-db"
+database_id = "a21fd813-06fa-41f1-b744-07bf1c5c7951"
 
-# ── R2 : stockage des visuels d'offres (optionnel) ──
-# Si ce binding existe, les images uploadées vont dans le bucket et sont servies via /img/...
-# S'il n'existe pas, le Worker bascule automatiquement en image intégrée (data URL) — donc
-# le portail fonctionne même AVANT que tu crées le bucket. Pour l'activer :
-#   1) crée un bucket R2 (ex. "repertoire-media")
-#   2) décommente les 3 lignes ci-dessous
-# [[r2_buckets]]
-# binding = "REPERTOIRE_MEDIA"
-# bucket_name = "repertoire-media"
-
-# ── Secret à définir (une seule fois) : ──
-#   npx wrangler secret put JWT_SECRET
-# ⚠️ Mets EXACTEMENT la même valeur que sur le Worker de l'affiliation (Les Cercles),
-# pour que la connexion unique fonctionne quand on fera le pilier « cookie .nyxia.top ».
+[vars]
+SITE_URL = "https://repertoire.nyxia.top"
