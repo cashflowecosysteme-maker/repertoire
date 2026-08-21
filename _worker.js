@@ -289,8 +289,8 @@ export default {
 const url = new URL(request.url);
     const path = url.pathname;
 
-    if (path === '/') {
-      return Response.redirect(url.origin + '/login.html', 302);
+    if (path === '/' || path === '') {
+      return Response.redirect(url.origin + '/repertoire.html', 302);
     }
 
     try {
