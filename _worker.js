@@ -464,6 +464,103 @@ async function handleSignup(request, env) {
 }
 
 
+
+// ───────────── WEBHOOK SYSTEME.IO ─────────────
+// Configure dans Systeme.io : URL = https://TON-DOMAINE/api/webhooks/systeme
+// Header optionnel : X-Webhook-Secret = valeur de SYSTEME_WEBHOOK_SECRET (Cloudflare var)
+//
+// À l'achat "promoteurs" (9 $/mois) : crée / met à jour le membre affiliate + code.
+// Upsell Éric 30j (49 $) : à brancher quand la page produit Éric existe (KV TTL 2592000).
+
+async function handleSystemeWebhook(request, env) {
+  const secret = env.SYSTEME_WEBHOOK_SECRET || '';
+  if (secret) {
+    const hdr = request.headers.get('X-Webhook-Secret') || request.headers.get('X-Systeme-Secret') || '';
+    if (hdr !== secret) return json({ error: 'Secret invalide.' }, 401);
+  }
+
+  const body = await request.json().catch(() => ({}));
+  // Systeme.io envoie souvent : email, first_name / full_name, tags, product, price, contact...
+  const email = String(
+    body.email || (body.contact && body.contact.email) || body.customer_email || ''
+  ).trim().toLowerCase();
+  const fullName = String(
+    body.full_name || body.fullName || body.first_name ||
+    (body.contact && (body.contact.name || body.contact.first_name)) || 'Membre'
+  ).trim();
+  const referralCode = String(
+    body.ref || body.referral_code || body.affiliate_code || body.parrain || ''
+  ).trim().toUpperCase();
+  const product = String(
+    body.product || body.product_name || body.offer || body.tag || ''
+  ).toLowerCase();
+  const event = String(body.event || body.type || body.action || 'purchase').toLowerCase();
+
+  if (!email) return json({ error: 'email manquant' }, 400);
+  if (!env.DB) return json({ error: 'DB absente' }, 500);
+
+  await ensureSchema(env);
+
+  // Upsell Éric 30 jours — réserve (page produit pas encore en ligne)
+  const isEric30 = /eric|éric|30\s*j|mentor/.test(product) && /49|upsell|order.?bump/.test(product + event + JSON.stringify(body).toLowerCase());
+  if (isEric30 || body.grant_eric_30 === true) {
+    const user = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();
+    const uid = user ? user.id : email;
+    if (env.CASHFLOW_KV) {
+      await env.CASHFLOW_KV.put('eric_access:' + uid, JSON.stringify({
+        email, granted_at: new Date().toISOString(), source: 'systeme'
+      }), { expirationTtl: 2592000 }); // 30 jours
+    }
+    return json({ success: true, granted: 'eric_30', email });
+  }
+
+  // Achat / abo promoteur principal → compte affiliate
+  let user = await env.DB.prepare('SELECT id, affiliate_code, role FROM users WHERE email = ?').bind(email).first();
+  let userId;
+  let affiliateCode;
+
+  if (user) {
+    userId = user.id;
+    affiliateCode = user.affiliate_code;
+  } else {
+    let parentId = null;
+    if (referralCode) {
+      const parent = await env.DB.prepare('SELECT id FROM users WHERE affiliate_code = ?').bind(referralCode).first();
+      if (parent) parentId = parent.id;
+    }
+    userId = crypto.randomUUID();
+    affiliateCode = await generateAffiliateCode(env);
+    const now = new Date().toISOString();
+    // Mot de passe temporaire : la personne se connectera via magic link / reset plus tard, ou Systeme envoie accès
+    const tempPass = await hashPasswordAffil(crypto.randomUUID().slice(0, 12));
+    await env.DB.prepare(
+      `INSERT INTO users (id, email, password_hash, full_name, role, affiliate_code, parent_id, created_at, updated_at)
+       VALUES (?, ?, ?, ?, 'affiliate', ?, ?, ?, ?)`
+    ).bind(userId, email, tempPass, fullName, affiliateCode, parentId, now, now).run();
+    try {
+      let parentAffId = null, grandparentAffId = null;
+      if (parentId) {
+        const pAff = await env.DB.prepare('SELECT id, parent_affiliate_id FROM affiliates WHERE user_id = ?').bind(parentId).first();
+        if (pAff) { parentAffId = pAff.id; grandparentAffId = pAff.parent_affiliate_id || null; }
+      }
+      await env.DB.prepare(
+        `INSERT INTO affiliates (id, user_id, parent_affiliate_id, grandparent_affiliate_id, status, created_at)
+         VALUES (?, ?, ?, ?, 'active', ?)`
+      ).bind(crypto.randomUUID(), userId, parentAffId, grandparentAffId, now).run();
+    } catch (e) { console.error('aff', e); }
+  }
+
+  // Marqueur d'accès promo actif (abo)
+  if (env.CASHFLOW_KV) {
+    await env.CASHFLOW_KV.put('promo_access:' + userId, JSON.stringify({
+      email, active: true, since: new Date().toISOString(), source: 'systeme', event
+    }));
+  }
+
+  return json({ success: true, userId, email, code: affiliateCode, role: 'affiliate' });
+}
+
+
 export default {
   async fetch(request, env) {
     
