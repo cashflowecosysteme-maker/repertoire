@@ -372,6 +372,98 @@ async function handleHelpdesk(request, env) {
   }
 }
 
+
+async function generateAffiliateCode(env) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  for (let attempt = 0; attempt < 12; attempt++) {
+    let code = '';
+    const buf = crypto.getRandomValues(new Uint8Array(8));
+    for (let i = 0; i < 8; i++) code += chars[buf[i] % chars.length];
+    const exists = await env.DB.prepare('SELECT id FROM users WHERE affiliate_code = ?').bind(code).first();
+    if (!exists) return code;
+  }
+  return crypto.randomUUID().replace(/-/g, '').slice(0, 10).toUpperCase();
+}
+
+// Inscription public — promo / cercle (lien de parrainage)
+async function handleSignup(request, env) {
+  if (!env.DB) return json({ error: 'Base non configurée.' }, 500);
+  const body = await request.json().catch(() => ({}));
+  const email = String(body.email || '').trim().toLowerCase();
+  const password = String(body.password || '');
+  const fullName = String(body.fullName || body.full_name || '').trim();
+  const referralCode = String(body.referralCode || body.referral_code || body.ref || '').trim().toUpperCase();
+
+  if (!email || !password || !fullName) {
+    return json({ error: 'Nom, courriel et mot de passe sont requis.' }, 400);
+  }
+  if (password.length < 6) {
+    return json({ error: 'Le mot de passe doit contenir au moins 6 caractères.' }, 400);
+  }
+
+  await ensureSchema(env);
+
+  // Même email autorisé sur d'autres portails ; ici on évite le doublon sur CE cercle
+  const existing = await env.DB.prepare('SELECT id FROM users WHERE email = ? AND role = ?').bind(email, 'affiliate').first();
+  if (existing) {
+    return json({ error: 'Ce courriel a déjà un espace promo. Connecte-toi plutôt.' }, 409);
+  }
+
+  let parentId = null;
+  if (referralCode) {
+    const parent = await env.DB.prepare(
+      `SELECT id FROM users WHERE affiliate_code = ?`
+    ).bind(referralCode).first();
+    if (parent) parentId = parent.id;
+  }
+
+  const id = crypto.randomUUID();
+  const affiliateCode = await generateAffiliateCode(env);
+  const passwordHash = await hashPasswordAffil(password);
+  const now = new Date().toISOString();
+
+  await env.DB.prepare(
+    `INSERT INTO users (id, email, password_hash, full_name, role, affiliate_code, parent_id, created_at, updated_at)
+     VALUES (?, ?, ?, ?, 'affiliate', ?, ?, ?, ?)`
+  ).bind(id, email, passwordHash, fullName, affiliateCode, parentId, now, now).run();
+
+  // Ligne affiliates pour la chaîne 3 niveaux (si table présente)
+  try {
+    let parentAffId = null;
+    let grandparentAffId = null;
+    if (parentId) {
+      const pAff = await env.DB.prepare('SELECT id, parent_affiliate_id FROM affiliates WHERE user_id = ?').bind(parentId).first();
+      if (pAff) {
+        parentAffId = pAff.id;
+        grandparentAffId = pAff.parent_affiliate_id || null;
+      }
+    }
+    const affId = crypto.randomUUID();
+    await env.DB.prepare(
+      `INSERT INTO affiliates (id, user_id, parent_affiliate_id, grandparent_affiliate_id, status, created_at)
+       VALUES (?, ?, ?, ?, 'active', ?)`
+    ).bind(affId, id, parentAffId, grandparentAffId, now).run();
+  } catch (e) {
+    console.error('affiliates insert', e);
+  }
+
+  const token = randomToken();
+  if (env.CASHFLOW_KV) {
+    await env.CASHFLOW_KV.put('session:' + token, JSON.stringify({
+      userId: id, email, firstname: fullName.split(' ')[0], role: 'affiliate', code: affiliateCode
+    }), { expirationTtl: SESSION_TTL });
+  }
+
+  return json({
+    success: true,
+    token,
+    firstname: fullName.split(' ')[0],
+    code: affiliateCode,
+    role: 'affiliate'
+  });
+}
+
+
 export default {
   async fetch(request, env) {
     
@@ -382,8 +474,14 @@ const url = new URL(request.url);
     if (path === '/' || path === '') {
       return Response.redirect(url.origin + '/repertoire.html', 302);
     }
+    // Lien de création d'équipe / parrainage → inscription
+    if (path.startsWith('/r/')) {
+      const code = path.slice(3).split('/')[0];
+      return Response.redirect(url.origin + '/inscription.html?ref=' + encodeURIComponent(code), 302);
+    }
 
     try {
+      if (path === '/api/signup' && request.method === 'POST') return await handleSignup(request, env);
       if (path === '/api/login' && request.method === 'POST') return await handleLogin(request, env);
       if (path === '/api/check-auth' && request.method === 'POST') return await handleCheckAuth(request, env);
       if (path === '/api/logout' && request.method === 'POST') return await handleLogout(request, env);
