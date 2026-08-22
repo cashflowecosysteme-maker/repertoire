@@ -281,6 +281,9 @@ async function handleUpdateProduct(request, env) {
         affiliate_link = COALESCE(?, affiliate_link),
         image_url = COALESCE(?, image_url),
         promo_code = COALESCE(?, promo_code),
+        promo_guide = COALESCE(?, promo_guide),
+        join_url = COALESCE(?, join_url),
+        join_type = COALESCE(?, join_type),
         status = COALESCE(?, status),
         updated_at = datetime('now')
        WHERE id = ?`
@@ -293,6 +296,9 @@ async function handleUpdateProduct(request, env) {
       body.affiliateLink || body.affiliate_link || null,
       body.imageUrl || body.image_url || null,
       body.promoCode || body.promo_code || null,
+      (body.promo_guide || body.promoGuide || '').trim() || null,
+      (body.join_url || body.joinUrl || '').trim() || null,
+      (body.join_type || body.joinType) || null,
       status,
       id
     ).run();
