@@ -526,12 +526,36 @@ function sortList(list){
 }
 
 
+/* Empreinte du PROMOTEUR (celui qui partage) — pas le ref visiteur */
+function getMyPromoCode(){
+  try {
+    return (localStorage.getItem('nyxia_promoter_code') || sessionStorage.getItem('nyxia_promoter_code') || '').trim().toUpperCase();
+  } catch(e){ return ''; }
+}
+function setMyPromoCode(code){
+  code = String(code||'').trim().toUpperCase();
+  if(!code) return;
+  try {
+    localStorage.setItem('nyxia_promoter_code', code);
+    sessionStorage.setItem('nyxia_promoter_code', code);
+  } catch(e){}
+}
 function withRef(url){
+  /* Pour Acheter : conserve le ref VISITEUR (qui l'a amené) */
   var ref = window.__NYXIA_REF || '';
   if(!url) return '#';
   if(!ref) return url;
   try{ var u=new URL(url,location.origin); u.searchParams.set('ref',ref); return u.toString(); }
   catch(e){ return url+(url.indexOf('?')>=0?'&':'?')+'ref='+encodeURIComponent(ref); }
+}
+function promoInscriptionUrl(productId, opts){
+  opts = opts || {};
+  var u = new URL('https://promoteurs.nyxia.top/inscription.html');
+  if(productId) u.searchParams.set('product', productId);
+  u.searchParams.set('intent', opts.intent || 'promo');
+  if(opts.free) u.searchParams.set('free', '1');
+  if(window.__NYXIA_REF) u.searchParams.set('ref', window.__NYXIA_REF);
+  return u.toString();
 }
 function openProductModal(id){
   var p = (window.ALL||ALL||[]).find(function(x){ return String(x.id)===String(id); });
@@ -549,31 +573,76 @@ function openProductModal(id){
   document.getElementById('promoPanel').classList.remove('open');
   var guide = (p.promo_guide||'').trim();
   document.getElementById('promoGuide').textContent = guide || 'Bientôt : publications prêtes, angles et messages types pour présenter ce produit facilement.';
-  var share = location.origin + '/?product=' + encodeURIComponent(p.id) + (window.__NYXIA_REF ? '&ref='+encodeURIComponent(window.__NYXIA_REF) : '');
-  document.getElementById('promoShare').textContent = share;
+  var myCode = getMyPromoCode();
+  var share = '';
+  var shareEl = document.getElementById('promoShare');
+  var copyBtn = document.getElementById('promoCopy');
   var join = document.getElementById('promoJoin');
-  if(p.join_url){
-    join.href = withRef(p.join_url);
-    join.style.display = 'inline-flex';
-    join.textContent = (p.join_type==='paid') ? 'Rejoindre le cercle (payant)' : 'Rejoindre le cercle (gratuit)';
-  } else { join.style.display = 'none'; }
+  var guideEl = document.getElementById('promoGuide');
+
+  if(myCode){
+    share = location.origin + '/?product=' + encodeURIComponent(p.id) + '&ref=' + encodeURIComponent(myCode);
+    shareEl.textContent = share;
+    shareEl.style.opacity = '1';
+    if(copyBtn){
+      copyBtn.style.display = 'inline-flex';
+      copyBtn.textContent = 'Copier mon lien (empreinte ' + myCode + ')';
+      copyBtn.onclick = function(){
+        navigator.clipboard.writeText(share).then(function(){
+          copyBtn.textContent = 'Copié ✓';
+          setTimeout(function(){ copyBtn.textContent = 'Copier mon lien (empreinte ' + myCode + ')'; }, 1600);
+        });
+      };
+    }
+  } else {
+    share = '';
+    shareEl.textContent = 'Tu n’as pas encore d’empreinte unique. Inscris-toi d’abord — gratuit ou payant selon le produit — pour recevoir ton code et partager ce lien.';
+    shareEl.style.opacity = '0.95';
+    if(copyBtn){
+      copyBtn.style.display = 'inline-flex';
+      copyBtn.textContent = 'Créer mon empreinte unique';
+      copyBtn.onclick = function(){
+        var isFree = !(p.join_type==='paid' || (Number(p.price)>0 && p.join_type!=='free'));
+        // Produit gratuit à promouvoir → inscription gratuite cercle
+        // Produit payant → page d’adhésion / paiement promoteur
+        window.location.href = promoInscriptionUrl(p.id, { intent:'promo', free: isFree || p.join_type==='free' || Number(p.price)===0 });
+      };
+    }
+  }
+
+  if(join){
+    var isPaidJoin = (p.join_type==='paid') || (Number(p.price)>0 && p.join_type!=='free');
+    if(p.join_url && isPaidJoin){
+      // Payant : lien d’offre (l’achat génère l’empreinte via webhook)
+      join.href = withRef(p.join_url);
+      join.style.display = 'inline-flex';
+      join.textContent = 'Rejoindre le cercle (payant) — mon code à l’achat';
+    } else if(p.join_url && !isPaidJoin){
+      // Gratuit : page d’inscription pour recevoir une empreinte unique
+      join.href = promoInscriptionUrl(p.id, { intent:'join', free:true });
+      join.style.display = 'inline-flex';
+      join.textContent = 'Rejoindre gratuitement (recevoir mon empreinte)';
+    } else if(!isPaidJoin){
+      join.href = promoInscriptionUrl(p.id, { intent:'join', free:true });
+      join.style.display = 'inline-flex';
+      join.textContent = 'Rejoindre gratuitement (recevoir mon empreinte)';
+    } else {
+      join.style.display = 'none';
+    }
+  }
+
+  if(guideEl && !myCode){
+    var baseGuide = (p.promo_guide||'').trim();
+    guideEl.textContent = (baseGuide ? baseGuide + '\n\n' : '') +
+      'Pour promouvoir ce produit, tu dois d’abord avoir ton empreinte unique. Sans code, le lien ne permet pas de savoir qui doit être relié aux revenus.';
+  }
+
   document.getElementById('prodModal').classList.add('open');
   document.getElementById('prodModalPromo').onclick = function(){
     document.getElementById('promoPanel').classList.toggle('open');
   };
-  // Acheter dans la modal aussi
   var buyBtn = document.getElementById('prodModalBuy');
   if (buyBtn && (!p.affiliate_link)) buyBtn.style.display = 'none';
-  var copyBtn = document.getElementById('promoCopy');
-  if (copyBtn) {
-    copyBtn.textContent = 'Copier le lien';
-    copyBtn.onclick = function(){
-      navigator.clipboard.writeText(share).then(function(){
-        copyBtn.textContent = 'Copié ✓';
-        setTimeout(function(){ copyBtn.textContent = 'Copier le lien'; }, 1600);
-      });
-    };
-  }
 }
 
 function bindProductButtons(){
