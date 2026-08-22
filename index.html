@@ -550,7 +550,7 @@ function withRef(url){
 }
 function promoInscriptionUrl(productId, opts){
   opts = opts || {};
-  var u = new URL('https://promoteurs.nyxia.top/inscription.html');
+  var u = new URL('/inscription.html', location.origin);
   if(productId) u.searchParams.set('product', productId);
   u.searchParams.set('intent', opts.intent || 'promo');
   if(opts.free) u.searchParams.set('free', '1');
@@ -644,7 +644,9 @@ function openProductModal(id){
 
   document.getElementById('prodModal').classList.add('open');
   document.getElementById('prodModalPromo').onclick = function(){
-    document.getElementById('promoPanel').classList.toggle('open');
+    var pan = document.getElementById('promoPanel');
+    pan.classList.add('open');
+    pan.scrollIntoView({ behavior:'smooth', block:'nearest' });
   };
   var buyBtn = document.getElementById('prodModalBuy');
   if (buyBtn && (!p.affiliate_link)) buyBtn.style.display = 'none';
