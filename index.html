@@ -602,10 +602,15 @@ function openProductModal(id){
       copyBtn.style.display = 'inline-flex';
       copyBtn.textContent = 'Créer mon empreinte unique';
       copyBtn.onclick = function(){
-        var isFree = !(p.join_type==='paid' || (Number(p.price)>0 && p.join_type!=='free'));
-        // Produit gratuit à promouvoir → inscription gratuite cercle
-        // Produit payant → page d’adhésion / paiement promoteur
-        window.location.href = promoInscriptionUrl(p.id, { intent:'promo', free: isFree || p.join_type==='free' || Number(p.price)===0 });
+        var isPaidJoin = (p.join_type==='paid') || (Number(p.price)>0 && p.join_type!=='free');
+        var salesUrl = p.join_url || p.affiliate_link || '';
+        if(isPaidJoin && salesUrl){
+          // Produit PAYANT → page de vente du produit promoteur (l'empreinte est générée à l'achat)
+          window.location.href = withRef(salesUrl);
+        } else {
+          // Offre GRATUITE (ou payante sans lien de vente) → page d'inscription pour recevoir l'empreinte
+          window.location.href = promoInscriptionUrl(p.id, { intent:'promo', free: !isPaidJoin });
+        }
       };
     }
   }
