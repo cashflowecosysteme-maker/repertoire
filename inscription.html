@@ -69,7 +69,7 @@ input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(123,
     <div id="panel-paid">
       <h2>Accès promoteur</h2>
       <p class="sub">À l'achat, ton empreinte unique est créée automatiquement.</p>
-      <div class="price-big">9 $<span> / mois</span></div>
+      <div class="price-big" id="paid-price">9 $<span> / mois</span></div>
       <p class="price-note">Code unique après paiement</p>
       <a class="btn" id="payBtn" href="https://www.publication-web.com/nyxia/promoteurs">Continuer vers le paiement sécurisé</a>
       <p class="secure">Systeme.io · empreinte après confirmation</p>
@@ -99,6 +99,40 @@ input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(123,
   if (ref) q.push('ref=' + encodeURIComponent(ref));
   if (product) q.push('product=' + encodeURIComponent(product));
   if (q.length) pay.href = base + '?' + q.join('&');
+
+  // ── Pilier 2 : le PRODUIT décide (gratuit/payant + sa propre page de paiement) ──
+  if (product) {
+    fetch('/api/repertoire').then(function(r){ return r.json(); }).then(function(data){
+      var list = (data && data.products) || [];
+      var p = list.find(function(x){ return String(x.id) === String(product); });
+      if (!p) return;
+      var isPaid = (p.join_type === 'paid') || (Number(p.price) > 0 && p.join_type !== 'free');
+      // Le produit est la source de vérité pour le parcours
+      document.getElementById('panel-free').style.display = isPaid ? 'none' : 'block';
+      document.getElementById('panel-paid').style.display = isPaid ? 'block' : 'none';
+      if (!isPaid) return;
+      // Produit payant AVEC sa propre page de paiement → on y envoie (le prix y vit)
+      var ownUrl = (p.join_url || '').trim();
+      if (ownUrl) {
+        var target = ownUrl;
+        try {
+          var u = new URL(ownUrl);
+          if (ref) u.searchParams.set('ref', ref);
+          if (product) u.searchParams.set('product', product);
+          target = u.toString();
+        } catch (e) {
+          var extra = [];
+          if (ref) extra.push('ref=' + encodeURIComponent(ref));
+          if (product) extra.push('product=' + encodeURIComponent(product));
+          if (extra.length) target = ownUrl + (ownUrl.indexOf('?') >= 0 ? '&' : '?') + extra.join('&');
+        }
+        pay.href = target;
+        var priceEl = document.getElementById('paid-price');
+        if (priceEl) priceEl.innerHTML = 'Accès promoteur<span> · tarif sur la page sécurisée</span>';
+      }
+      // Sinon (produit payant sans page dédiée) → on garde le défaut : 9 $/mois, tes produits
+    }).catch(function(){ /* en cas d'échec, on garde le parcours par défaut */ });
+  }
 
   document.getElementById('btn-free').onclick = async function(){
     var msg = document.getElementById('free-msg');
