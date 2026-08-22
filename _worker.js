@@ -216,7 +216,7 @@ async function handleListProducts(request, env) {
   try {
     await ensureSchema(env);
     const { results } = await env.DB.prepare(
-      `SELECT id, title, description_short, price, price_monthly, billing_type, status, image_url, promo_code, commission_n1, commission_n2, commission_n3, seller_id, created_at
+      `SELECT id, title, description_short, price, price_monthly, billing_type, status, image_url, promo_code, commission_n1, commission_n2, commission_n3, seller_id, join_type, join_url, created_at
        FROM marketplace_products ORDER BY created_at DESC LIMIT 200`
     ).all();
     return json({ products: results || [] });
@@ -552,6 +552,19 @@ async function generateAffiliateCode(env) {
 }
 
 // Inscription public — promo / cercle (lien de parrainage)
+function normalizeMessenger(v) {
+  v = String(v || '').trim();
+  if (!v) return null;
+  if (/^https?:\/\//i.test(v)) return v;
+  if (/m\.me\//i.test(v)) return 'https://' + v.replace(/^\/+/, '');
+  return 'https://m.me/' + v.replace(/^@/, '').replace(/^\/+/, '');
+}
+async function ensureUserColumns(env) {
+  if (!env.DB) return;
+  try { await env.DB.prepare(`ALTER TABLE users ADD COLUMN last_login TEXT`).run(); } catch (_) {}
+  try { await env.DB.prepare(`ALTER TABLE users ADD COLUMN messenger TEXT`).run(); } catch (_) {}
+  try { await env.DB.prepare(`ALTER TABLE users ADD COLUMN last_alert TEXT`).run(); } catch (_) {}
+}
 async function handleSignup(request, env) {
   if (!env.DB) return json({ error: 'Base non configurée.' }, 500);
   const body = await request.json().catch(() => ({}));
@@ -559,6 +572,8 @@ async function handleSignup(request, env) {
   const password = String(body.password || '');
   const fullName = String(body.fullName || body.full_name || '').trim();
   const referralCode = String(body.referralCode || body.referral_code || body.ref || '').trim().toUpperCase();
+  const messenger = normalizeMessenger(body.messenger);
+  await ensureUserColumns(env);
 
   if (!email || !password || !fullName) {
     return json({ error: 'Nom, courriel et mot de passe sont requis.' }, 400);
@@ -589,9 +604,9 @@ async function handleSignup(request, env) {
   const now = new Date().toISOString();
 
   await env.DB.prepare(
-    `INSERT INTO users (id, email, password_hash, full_name, role, affiliate_code, parent_id, created_at, updated_at)
-     VALUES (?, ?, ?, ?, 'affiliate', ?, ?, ?, ?)`
-  ).bind(id, email, passwordHash, fullName, affiliateCode, parentId, now, now).run();
+    `INSERT INTO users (id, email, password_hash, full_name, role, affiliate_code, parent_id, messenger, created_at, updated_at)
+     VALUES (?, ?, ?, ?, 'affiliate', ?, ?, ?, ?, ?)`
+  ).bind(id, email, passwordHash, fullName, affiliateCode, parentId, messenger, now, now).run();
 
   // Ligne affiliates pour la chaîne 3 niveaux (si table présente)
   try {
