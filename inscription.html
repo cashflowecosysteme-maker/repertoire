@@ -59,6 +59,8 @@ input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(123,
       <label>Prénom</label><input id="f-name" placeholder="Ton prénom">
       <label>Courriel</label><input id="f-email" type="email" placeholder="toi@email.com">
       <label>Mot de passe (min. 6)</label><input id="f-pass" type="password" placeholder="••••••••">
+      <label>Ton Messenger (facultatif)</label><input id="f-messenger" placeholder="m.me/ton.nom — ou juste ton.nom">
+      <div style="font-size:11px;color:var(--t3);margin:-6px 0 8px">Pour que ton parrain puisse t'écrire et t'accompagner 💜</div>
       <button type="button" class="btn" id="btn-free">Créer mon empreinte</button>
       <div class="msg" id="free-msg"></div>
       <div class="code-box" id="free-code" style="display:none">Ton empreinte unique<b id="free-code-val">—</b>
@@ -151,7 +153,7 @@ input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(123,
       var r = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fullName: name, email: email, password: password, referralCode: ref, ref: ref, product: product })
+        body: JSON.stringify({ fullName: name, email: email, password: password, referralCode: ref, ref: ref, product: product, messenger: (document.getElementById('f-messenger').value || '').trim() })
       });
       var data = await r.json().catch(function(){ return {}; });
       if (!r.ok || !data.success) {
