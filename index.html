@@ -355,6 +355,13 @@ button.card-cta,.card-cta{font:inherit;width:100%;text-align:center;
 .promo-panel h3{color:#fff;font-size:.95rem;margin:0 0 8px}
 .promo-panel .guide{white-space:pre-wrap;color:#b9b3d6;font-size:.9rem;margin-bottom:12px;line-height:1.5}
 .promo-panel .benefit{font-size:.88rem;color:#c4b5fd;margin:0 0 12px;padding:10px 12px;border-radius:10px;background:rgba(123,92,255,.12);border:1px solid rgba(123,92,255,.22)}
+.promo-status{font-size:.9rem;font-weight:600;margin:0 0 12px;padding:10px 12px;border-radius:10px}
+.promo-status.free{color:#6ee7b7;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3)}
+.promo-status.paid{color:#F4C842;background:rgba(244,200,66,.12);border:1px solid rgba(244,200,66,.3)}
+.promo-tools{margin:0 0 14px;padding:12px 14px;border-radius:12px;background:rgba(123,92,255,.06);border:1px solid rgba(123,92,255,.18)}
+.promo-tools h3{color:#fff;font-size:.9rem;margin:0 0 8px}
+.promo-tools ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.promo-tools li{font-size:.85rem;color:#c9c4e6;line-height:1.4}
 .promo-panel code{display:block;word-break:break-all;padding:10px;border-radius:10px;background:rgba(0,0,0,.45);border:1px solid rgba(123,92,255,.25);color:#e9e5ff;font-size:.78rem;margin:8px 0 12px}
 .promo-panel .btn-copy{
   display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:12px;
@@ -573,6 +580,15 @@ function openProductModal(id){
   document.getElementById('promoPanel').classList.remove('open');
   var guide = (p.promo_guide||'').trim();
   document.getElementById('promoGuide').textContent = guide || 'Bientôt : publications prêtes, angles et messages types pour présenter ce produit facilement.';
+  // Gratuit ou payant : décidé PAR PRODUIT (join_type). Le prix d'un produit payant vit sur sa page de paiement.
+  var _isPaidJoin = (p.join_type==='paid') || (Number(p.price)>0 && p.join_type!=='free');
+  var statusEl = document.getElementById('promoStatus');
+  if(statusEl){
+    statusEl.textContent = _isPaidJoin
+      ? '🔑 Accès promoteur — le tarif est indiqué sur la page du produit.'
+      : '✨ Promotion gratuite pour toi — crée ton empreinte et partage.';
+    statusEl.className = 'promo-status ' + (_isPaidJoin ? 'paid' : 'free');
+  }
   var myCode = getMyPromoCode();
   var share = '';
   var shareEl = document.getElementById('promoShare');
@@ -900,6 +916,17 @@ fetch('/api/repertoire')
       <div class="promo-panel" id="promoPanel">
         <h3>Faire la promotion</h3>
         <p class="benefit" id="promoBenefit">En partageant ce produit, tu fais rayonner le Cercle — et grâce à ton lien personnel, les revenus générés te sont reliés.</p>
+        <div class="promo-status" id="promoStatus"></div>
+        <div class="promo-tools">
+          <h3>Ce que tu reçois pour promouvoir</h3>
+          <ul>
+            <li>🗺️ Ta Success RoadMap clé en main</li>
+            <li>🎨 Des visuels &amp; publications prêtes à partager</li>
+            <li>💜 L'accompagnement de Diane &amp; Éric — tu n'es jamais seul</li>
+            <li>🌍 Un terrain vivant de près de 97 000 personnes</li>
+            <li>📊 Le suivi de tes revenus, relié à ton empreinte</li>
+          </ul>
+        </div>
         <div class="guide" id="promoGuide"></div>
         <h3>Ton lien à partager</h3>
         <code id="promoShare"></code>
