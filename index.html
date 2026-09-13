@@ -885,10 +885,35 @@ fetch('/api/repertoire')
 
 <script>
 (function(){
+  function normalizeNyxiaRef(value){
+    return String(value||'').trim().toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,120);
+  }
+  function saveNyxiaRef(value){
+    var ref=normalizeNyxiaRef(value);
+    if(!ref)return '';
+    try{ localStorage.setItem('nyxia_ref',ref); }catch(e){}
+    try{
+      var maxAge=60*60*24*90;
+      document.cookie='nyxia_ref='+encodeURIComponent(ref)+'; Path=/; Max-Age='+maxAge+'; SameSite=Lax; Secure; Domain=.nyxia.top';
+    }catch(e){}
+    return ref;
+  }
+  function readSharedNyxiaRef(){
+    try{
+      var m=document.cookie.match(/(?:^|;\s*)nyxia_ref=([^;]+)/);
+      return m?normalizeNyxiaRef(decodeURIComponent(m[1])):'';
+    }catch(e){ return ''; }
+  }
+
   var p = new URLSearchParams(location.search);
-  var ref = (p.get('ref')||p.get('code')||'').trim().toUpperCase();
-  if (ref) { try { localStorage.setItem('nyxia_ref', ref); } catch(e){} }
-  else { try { ref = localStorage.getItem('nyxia_ref')||''; } catch(e){ ref=''; } }
+  var ref = normalizeNyxiaRef(p.get('ref')||p.get('code')||'');
+  if(ref){
+    ref=saveNyxiaRef(ref);
+  }else{
+    try{ ref=normalizeNyxiaRef(localStorage.getItem('nyxia_ref')||''); }catch(e){ ref=''; }
+    if(!ref)ref=readSharedNyxiaRef();
+    if(ref)ref=saveNyxiaRef(ref);
+  }
   window.__NYXIA_REF = ref || null;
   // rewrite card links after render: hook render if exists
   var _render = window.render;
