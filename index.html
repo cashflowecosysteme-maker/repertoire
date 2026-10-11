@@ -649,7 +649,16 @@ function openProductModal(id){
       join.style.display = 'inline-flex';
       join.textContent = 'Rejoindre gratuitement (recevoir mon empreinte)';
     } else {
-      join.style.display = 'none';
+      // Sans lien de paiement configuré, garder l'inscription Cloudflare accessible.
+      join.href = promoInscriptionUrl(p.id, { intent:'promo', free:false });
+      join.style.display = 'inline-flex';
+      join.textContent = 'Rejoindre le Cercle d’entraide';
+    }
+    if(myCode){
+      join.href = 'https://promoteurs.nyxia.top/login.html';
+      join.style.display = 'inline-flex';
+      join.textContent = 'Accéder à mon tableau de bord Promoteurs';
+      join.target = '_blank';
     }
   }
 
@@ -957,6 +966,7 @@ fetch('/api/repertoire')
         <div class="btn-row">
           <button type="button" class="btn-copy" id="promoCopy">Copier le lien</button>
           <a class="btn-join" id="promoJoin" href="#" target="_blank" rel="noopener" style="display:none">Rejoindre le cercle</a>
+          <a class="btn-join" href="https://promoteurs.nyxia.top/login.html" target="_blank" rel="noopener">Déjà membre ? Mon tableau de bord</a>
         </div>
       </div>
     </div>
