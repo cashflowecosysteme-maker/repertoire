@@ -334,6 +334,8 @@ button{cursor:pointer;font-family:inherit;border:none;outline:none;color:inherit
 @media(prefers-reduced-motion:reduce){
   *{animation:none!important;scroll-behavior:auto!important;transition:none!important}
 }
+dialog.circle-detail{width:min(760px,calc(100% - 32px));max-height:90vh;overflow:auto;margin:auto;padding:24px;border:1px solid rgba(123,92,255,.35);border-radius:24px;background:#0F1C3F;color:#D6D9F0}dialog.circle-detail::backdrop{background:rgba(4,8,18,.85);backdrop-filter:blur(6px)}.circle-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.circle-actions a{padding:10px 16px;border-radius:30px;border:1px solid rgba(123,92,255,.4);color:#fff;text-decoration:none}.circle-actions .circle-join{background:linear-gradient(135deg,#7B5CFF,#5A6CFF)}.circle-close{float:right;border:1px solid rgba(123,92,255,.3);border-radius:50%;background:transparent;color:#fff;padding:8px 12px;cursor:pointer}.circle-detail img{width:100%;border-radius:16px;margin:18px 0;max-height:380px;object-fit:contain}.circle-invite{padding:14px;border:1px solid rgba(244,200,66,.3);border-radius:14px;margin-top:18px;color:#F4C842}.card-cta{cursor:pointer;font:inherit}
+.card .card-cta,.circle-actions a,.circle-actions .circle-join{display:inline-flex;align-items:center;justify-content:center;width:auto;min-height:40px;padding:10px 18px;border:1px solid rgba(214,217,240,.25);border-radius:14px;background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.025));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 4px 16px rgba(0,0,0,.18);color:#D6D9F0;font-size:13px;font-weight:500;text-decoration:none;transition:background .2s,border-color .2s,transform .2s}.card .card-cta:hover,.circle-actions a:hover{background:rgba(255,255,255,.12);border-color:rgba(244,200,66,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 4px 16px rgba(0,0,0,.18);transform:translateY(-1px);color:#fff}.card .card-cta:focus-visible,.circle-actions a:focus-visible{outline:2px solid #F4C842;outline-offset:3px}
 </style>
 </head>
 <body>
@@ -530,7 +532,7 @@ function render(){
           '<h3 class="card-title">' + escapeHtml(p.title || 'Sans titre') + '</h3>' +
           '<p class="card-desc">' + escapeHtml(desc) + (desc.length >= 140 ? '…' : '') + '</p>' +
           '<div class="card-meta"><span class="card-price">' + money(p.price) + '</span></div>' +
-          '<a class="card-cta" href="' + escapeAttr(href) + '">Découvrir →</a>' +
+          '<button type="button" class="card-cta" data-circle-product="' + escapeAttr(String(p.id)) + '">Voir dans le Cercle</button>' +
         '</div>' +
       '</article>'
     );
@@ -663,6 +665,15 @@ fetch('/api/repertoire')
     });
   };
 })();
+</script>
+<dialog id="circleDetail" class="circle-detail" aria-labelledby="circleTitle"><button type="button" class="circle-close" aria-label="Fermer">×</button><p style="color:#F4C842">💜 PRODUIT DU CERCLE</p><h2 id="circleTitle"></h2><img id="circleImage" alt=""><p id="circleDescription"></p><p class="circle-invite">💜 Rejoins immédiatement le Cercle d’entraide ! L’inscription est gratuite.</p><div class="circle-actions"><a id="circleOffer" target="_blank" rel="noopener">Voir l’offre</a><a class="circle-join" id="circleJoin" target="_blank" rel="noopener">Rejoindre le Cercle</a><a href="https://promoteurs.nyxia.top/login.html" target="_blank" rel="noopener">Déjà membre ?</a></div></dialog>
+<script>
+(function(){const dialog=document.getElementById('circleDetail');let opener;
+function safeLink(raw){try{const u=new URL(raw,location.origin);return /^https?:$/.test(u.protocol)?u:null;}catch(e){return null;}}
+document.getElementById('grid').addEventListener('click',function(e){const button=e.target.closest('[data-circle-product]');if(!button)return;const p=ALL.find(item=>String(item.id)===button.dataset.circleProduct);if(!p)return;opener=button;document.getElementById('circleTitle').textContent=p.title||'Produit du Cercle';document.getElementById('circleDescription').textContent=p.description_long||p.description_short||'';const image=document.getElementById('circleImage');const imageURL=safeLink(p.image_url||'');image.hidden=!p.image_url||!imageURL;if(!image.hidden){image.src=imageURL.href;image.alt=p.title||'';}
+const ref=new URL(location.href).searchParams.get('ref');const offer=safeLink(p.affiliate_link||'');const offerButton=document.getElementById('circleOffer');offerButton.hidden=!p.affiliate_link||!offer;if(offer){if(ref)offer.searchParams.set('ref',ref);offerButton.href=offer.href;}
+const signup=new URL('https://www.universnyxia.top/nyxia/cercledentraide');if(ref)signup.searchParams.set('ref',ref);document.getElementById('circleJoin').href=signup.href;dialog.showModal();});
+dialog.querySelector('.circle-close').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});dialog.addEventListener('close',()=>{if(opener)opener.focus();});})();
 </script>
 </body>
 </html>
