@@ -1,0 +1,186 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Helpdesk NyXia</title><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet"><style>:root{--primary:#7B5CFF;--secondary:#5A6CFF;--primary-light:#a78bfa;--green:#34d399;--text:#D6D9F0;--text-secondary:#b9b3d6;--border:rgba(123,92,255,.25);--transition:.2s}*{box-sizing:border-box}body{margin:0;background:transparent;font-family:Outfit,Arial,sans-serif}button{border:0;cursor:pointer;font:inherit}/* ─────────── HELPDESK NyXia (chatbot flottant) ─────────── */
+.nx-launcher{
+  position:fixed;right:22px;bottom:22px;z-index:60;display:flex;align-items:center;gap:8px;
+  padding:8px;border-radius:50px;background:linear-gradient(135deg,var(--primary),var(--secondary));
+  box-shadow:0 10px 30px rgba(123,92,255,.45);cursor:pointer;
+  transition:transform var(--transition),box-shadow var(--transition);
+}
+.nx-launcher:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(123,92,255,.55)}
+.nx-launcher img{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.5)}
+.nx-launcher-label{color:#fff;font-weight:600;font-size:.9rem;padding-right:12px;white-space:nowrap}
+@media(max-width:520px){.nx-launcher-label{display:none}}
+
+.nx-panel{
+  position:fixed;right:22px;bottom:22px;z-index:61;
+  width:min(384px,calc(100vw - 32px));height:min(564px,calc(100vh - 40px));
+  display:none;flex-direction:column;overflow:hidden;border-radius:20px;
+  background:rgba(10,14,32,.97);border:1px solid rgba(123,92,255,.35);
+  box-shadow:0 24px 70px rgba(0,0,0,.6);backdrop-filter:blur(16px);
+}
+.nx-panel.open{display:flex;animation:nxIn .25s ease-out}
+@keyframes nxIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.nx-head{
+  display:flex;align-items:center;gap:12px;padding:14px 16px;
+  border-bottom:1px solid rgba(123,92,255,.2);
+  background:linear-gradient(135deg,rgba(123,92,255,.25),rgba(90,108,255,.12));
+}
+.nx-head img{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(123,92,255,.5)}
+.nx-h-name{font-weight:700;color:#fff;font-size:.98rem;line-height:1.15}
+.nx-h-status{font-size:.74rem;color:var(--green);display:flex;align-items:center;gap:5px}
+.nx-h-status::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green)}
+.nx-close{
+  margin-left:auto;width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.06);
+  color:var(--text-secondary);font-size:17px;display:flex;align-items:center;justify-content:center;transition:all var(--transition);
+}
+.nx-close:hover{color:#fff;background:rgba(255,255,255,.12)}
+.nx-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.nx-msg{
+  max-width:86%;padding:11px 14px;border-radius:15px;font-size:.9rem;line-height:1.5;
+  white-space:pre-wrap;word-wrap:break-word;
+}
+.nx-msg a{color:#fff;text-decoration:underline}
+.nx-msg.bot{align-self:flex-start;background:rgba(123,92,255,.16);border:1px solid rgba(123,92,255,.28);color:var(--text);border-bottom-left-radius:5px}
+.nx-msg.user{align-self:flex-end;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border-bottom-right-radius:5px}
+.nx-typing{align-self:flex-start;display:flex;gap:4px;padding:12px 14px}
+.nx-typing span{width:7px;height:7px;border-radius:50%;background:var(--primary-light);animation:nxBlink 1.2s infinite}
+.nx-typing span:nth-child(2){animation-delay:.2s}
+.nx-typing span:nth-child(3){animation-delay:.4s}
+@keyframes nxBlink{0%,60%,100%{opacity:.25}30%{opacity:1}}
+.nx-chips{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 10px}
+.nx-chip{
+  padding:8px 12px;border-radius:50px;background:rgba(123,92,255,.12);border:1px solid var(--border);
+  color:var(--text-secondary);font-size:.8rem;transition:all var(--transition);
+}
+.nx-chip:hover{color:#fff;border-color:var(--primary)}
+.nx-inputbar{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(123,92,255,.2)}
+.nx-inputbar input{
+  flex:1;padding:11px 14px;border-radius:12px;border:1px solid var(--border);
+  background:rgba(14,20,48,.9);color:#fff;font-family:Outfit,sans-serif;font-size:.9rem;outline:none;
+}
+.nx-inputbar input:focus{border-color:var(--primary)}
+.nx-send{
+  width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform var(--transition);
+}
+.nx-send:hover{transform:translateY(-1px)}
+.nx-send svg{width:18px;height:18px;fill:currentColor}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;scroll-behavior:auto!important;transition:none!important}
+}
+.nx-launcher,.nx-panel{right:8px;bottom:8px}.nx-panel{width:calc(100vw - 16px);height:calc(100vh - 16px)}.nx-launcher-label{display:block!important}.nx-inputbar input{min-width:0}</style></head><body><button class="nx-launcher" id="nxLauncher" aria-label="Ouvrir le chat NyXia">
+  <img src="/NyXia.png" alt="NyXia">
+  <span class="nx-launcher-label">Une question ? 💜</span>
+</button>
+<section class="nx-panel" id="nxPanel" aria-label="Chat d'aide NyXia">
+  <div class="nx-head">
+    <img src="/NyXia.png" alt="NyXia">
+    <div>
+      <div class="nx-h-name">NyXia</div>
+      <div class="nx-h-status">En ligne</div>
+    </div>
+    <button class="nx-close" id="nxClose" aria-label="Fermer le chat">✕</button>
+  </div>
+  <div class="nx-body" id="nxBody"></div>
+  <div class="nx-chips" id="nxChips">
+    <button class="nx-chip" type="button" onclick="nxQuick(this.textContent)">C'est quoi le Répertoire ?</button>
+    <button class="nx-chip" type="button" onclick="nxQuick(this.textContent)">Comment rendre mon offre visible ?</button>
+    <button class="nx-chip" type="button" onclick="nxAskSpace()">Demander mon espace</button>
+  </div>
+  <div class="nx-inputbar">
+    <input type="text" id="nxInput" placeholder="Écris ton message…" aria-label="Ton message" onkeydown="if(event.key==='Enter')nxSend()">
+    <button class="nx-send" type="button" id="nxSend" onclick="nxSend()" aria-label="Envoyer">
+      <svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-7-8-3z"/></svg>
+    </button>
+  </div>
+</section>
+
+<script>
+(function () {
+  var launcher = document.getElementById('nxLauncher');
+  var panel = document.getElementById('nxPanel');
+  var closeBtn = document.getElementById('nxClose');
+  var body = document.getElementById('nxBody');
+  var input = document.getElementById('nxInput');
+  var chips = document.getElementById('nxChips');
+  var MESSENGER = 'https://m.me/LeMiroirdeNyXia';
+  var history = [];
+  var greeted = false;
+  var busy = false;
+
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function fmt(s){
+    var h = esc(s);
+    h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+    h = h.replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+    return h.replace(/\n/g,'<br>');
+  }
+  function addMsg(text, who){
+    var d = document.createElement('div');
+    d.className = 'nx-msg ' + (who === 'user' ? 'user' : 'bot');
+    d.innerHTML = fmt(text);
+    body.appendChild(d);
+    body.scrollTop = body.scrollHeight;
+  }
+  function typing(on){
+    var ex = document.getElementById('nxTyping');
+    if (on){
+      if (ex) return;
+      var t = document.createElement('div');
+      t.className = 'nx-typing'; t.id = 'nxTyping';
+      t.innerHTML = '<span></span><span></span><span></span>';
+      body.appendChild(t); body.scrollTop = body.scrollHeight;
+    } else if (ex){ ex.remove(); }
+  }
+  function openChat(){
+    panel.classList.add('open');parent.postMessage({type:'nyxia-helpdesk',open:true},'*');
+    launcher.style.display = 'none';
+    if (!greeted){
+      greeted = true;
+      addMsg("Bonjour ✨ Je suis NyXia. Je t'aide à trouver le produit qu'il te faut dans le Répertoire, ou à rendre ta propre offre visible. Qu'est-ce qui t'amène ?", 'bot');
+    }
+    setTimeout(function(){ input.focus(); }, 100);
+  }
+  function closeChat(){
+    panel.classList.remove('open');parent.postMessage({type:'nyxia-helpdesk',open:false},'*');
+    launcher.style.display = 'flex';
+  }
+  launcher.addEventListener('click', openChat);
+  closeBtn.addEventListener('click', closeChat);
+
+  window.nxQuick = function(q){ input.value = q; nxSend(); };
+  window.nxAskSpace = function(){
+    if (chips) chips.style.display = 'none';
+    addMsg('Demander mon espace', 'user');
+    addMsg("Avec joie 💜 Écris à l'équipe ici, on t'accueille et on ouvre ton espace ensemble : " + MESSENGER, 'bot');
+  };
+
+  window.nxSend = function(){
+    var msg = (input.value || '').trim();
+    if (!msg || busy) return;
+    if (chips) chips.style.display = 'none';
+    addMsg(msg, 'user');
+    history.push({ role:'user', content: msg });
+    input.value = '';
+    busy = true; typing(true);
+    fetch('/api/helpdesk', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ message: msg, history: history.slice(0, -1) })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      typing(false); busy = false;
+      var reply = (data && data.content) || "Je reviens dans un instant 💜";
+      addMsg(reply, 'bot');
+      history.push({ role:'assistant', content: reply });
+      if (history.length > 20) history = history.slice(-20);
+    })
+    .catch(function(){
+      typing(false); busy = false;
+      addMsg("Petite interruption… tu peux réessayer, ou écrire directement à l'équipe : " + MESSENGER, 'bot');
+    });
+  };
+})();
+</script>
+</body></html>

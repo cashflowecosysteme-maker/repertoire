@@ -551,121 +551,8 @@ fetch('/api/repertoire')
   });
 </script>
 <!-- ══════════ HELPDESK NyXia ══════════ -->
-<button class="nx-launcher" id="nxLauncher" aria-label="Ouvrir le chat NyXia">
-  <img src="/NyXia.png" alt="NyXia">
-  <span class="nx-launcher-label">Une question ? 💜</span>
-</button>
-<section class="nx-panel" id="nxPanel" aria-label="Chat d'aide NyXia">
-  <div class="nx-head">
-    <img src="/NyXia.png" alt="NyXia">
-    <div>
-      <div class="nx-h-name">NyXia</div>
-      <div class="nx-h-status">En ligne</div>
-    </div>
-    <button class="nx-close" id="nxClose" aria-label="Fermer le chat">✕</button>
-  </div>
-  <div class="nx-body" id="nxBody"></div>
-  <div class="nx-chips" id="nxChips">
-    <button class="nx-chip" type="button" onclick="nxQuick(this.textContent)">C'est quoi le Répertoire ?</button>
-    <button class="nx-chip" type="button" onclick="nxQuick(this.textContent)">Comment rendre mon offre visible ?</button>
-    <button class="nx-chip" type="button" onclick="nxAskSpace()">Demander mon espace</button>
-  </div>
-  <div class="nx-inputbar">
-    <input type="text" id="nxInput" placeholder="Écris ton message…" aria-label="Ton message" onkeydown="if(event.key==='Enter')nxSend()">
-    <button class="nx-send" type="button" id="nxSend" onclick="nxSend()" aria-label="Envoyer">
-      <svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-7-8-3z"/></svg>
-    </button>
-  </div>
-</section>
-
-<script>
-(function () {
-  var launcher = document.getElementById('nxLauncher');
-  var panel = document.getElementById('nxPanel');
-  var closeBtn = document.getElementById('nxClose');
-  var body = document.getElementById('nxBody');
-  var input = document.getElementById('nxInput');
-  var chips = document.getElementById('nxChips');
-  var MESSENGER = 'https://m.me/LeMiroirdeNyXia';
-  var history = [];
-  var greeted = false;
-  var busy = false;
-
-  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-  function fmt(s){
-    var h = esc(s);
-    h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-    h = h.replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
-    return h.replace(/\n/g,'<br>');
-  }
-  function addMsg(text, who){
-    var d = document.createElement('div');
-    d.className = 'nx-msg ' + (who === 'user' ? 'user' : 'bot');
-    d.innerHTML = fmt(text);
-    body.appendChild(d);
-    body.scrollTop = body.scrollHeight;
-  }
-  function typing(on){
-    var ex = document.getElementById('nxTyping');
-    if (on){
-      if (ex) return;
-      var t = document.createElement('div');
-      t.className = 'nx-typing'; t.id = 'nxTyping';
-      t.innerHTML = '<span></span><span></span><span></span>';
-      body.appendChild(t); body.scrollTop = body.scrollHeight;
-    } else if (ex){ ex.remove(); }
-  }
-  function openChat(){
-    panel.classList.add('open');
-    launcher.style.display = 'none';
-    if (!greeted){
-      greeted = true;
-      addMsg("Bonjour ✨ Je suis NyXia. Je t'aide à trouver le produit qu'il te faut dans le Répertoire, ou à rendre ta propre offre visible. Qu'est-ce qui t'amène ?", 'bot');
-    }
-    setTimeout(function(){ input.focus(); }, 100);
-  }
-  function closeChat(){
-    panel.classList.remove('open');
-    launcher.style.display = 'flex';
-  }
-  launcher.addEventListener('click', openChat);
-  closeBtn.addEventListener('click', closeChat);
-
-  window.nxQuick = function(q){ input.value = q; nxSend(); };
-  window.nxAskSpace = function(){
-    if (chips) chips.style.display = 'none';
-    addMsg('Demander mon espace', 'user');
-    addMsg("Avec joie 💜 Écris à l'équipe ici, on t'accueille et on ouvre ton espace ensemble : " + MESSENGER, 'bot');
-  };
-
-  window.nxSend = function(){
-    var msg = (input.value || '').trim();
-    if (!msg || busy) return;
-    if (chips) chips.style.display = 'none';
-    addMsg(msg, 'user');
-    history.push({ role:'user', content: msg });
-    input.value = '';
-    busy = true; typing(true);
-    fetch('/api/helpdesk', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ message: msg, history: history.slice(0, -1) })
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      typing(false); busy = false;
-      var reply = (data && data.content) || "Je reviens dans un instant 💜";
-      addMsg(reply, 'bot');
-      history.push({ role:'assistant', content: reply });
-      if (history.length > 20) history = history.slice(-20);
-    })
-    .catch(function(){
-      typing(false); busy = false;
-      addMsg("Petite interruption… tu peux réessayer, ou écrire directement à l'équipe : " + MESSENGER, 'bot');
-    });
-  };
-})();
-</script>
+<iframe id="nyxia-helpdesk-frame" title="Helpdesk NyXia" src="https://repertoire.nyxia.top/helpdesk-page.html" style="position:fixed;right:14px;bottom:14px;width:260px;height:90px;max-width:calc(100vw - 28px);border:0;z-index:9999;background:transparent"></iframe>
+<script>(function(){var f=document.getElementById('nyxia-helpdesk-frame');window.addEventListener('message',function(e){if(e.origin!=='https://repertoire.nyxia.top'||e.source!==f.contentWindow||!e.data||e.data.type!=='nyxia-helpdesk')return;f.style.width=e.data.open?'400px':'260px';f.style.height=e.data.open?'min(600px, calc(100dvh - 28px))':'90px';});})();</script>
 <dialog id="circleDetail" class="circle-detail" aria-labelledby="circleTitle"><button type="button" class="circle-close" aria-label="Fermer">×</button><p style="color:#F4C842">💜 PRODUIT DU CERCLE</p><h2 id="circleTitle"></h2><img id="circleImage" alt=""><p id="circleDescription"></p><p class="circle-invite">💜 Rejoins immédiatement le Cercle d’entraide ! L’inscription est gratuite.</p><div class="circle-actions"><a id="circleOffer" target="_blank" rel="noopener">Voir l’offre</a><a class="circle-join" id="circleJoin" target="_blank" rel="noopener">Rejoindre le Cercle</a><a href="https://promoteurs.nyxia.top/login.html" target="_blank" rel="noopener">Déjà membre ?</a></div></dialog>
 <script>
 (function(){const dialog=document.getElementById('circleDetail');let opener;
@@ -677,3 +564,4 @@ dialog.querySelector('.circle-close').addEventListener('click',()=>dialog.close(
 </script>
 </body>
 </html>
+

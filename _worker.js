@@ -398,12 +398,12 @@ async function handleGetProduct(request, env, url) {
     let row;
     try {
       row = await env.DB.prepare(
-        `SELECT id, title, description_short, description_long, price, price_monthly, billing_type, image_url, promo_code, affiliate_link, promo_guide, join_url, join_type, status, created_at
+        `SELECT id, title, description_short, description_long, commission_n1, commission_n2, commission_n3, price, price_monthly, billing_type, image_url, promo_code, affiliate_link, promo_guide, join_url, join_type, status, created_at
          FROM marketplace_products WHERE id = ? LIMIT 1`
       ).bind(id).first();
     } catch (e) {
       row = await env.DB.prepare(
-        `SELECT id, title, description_short, description_long, price, image_url, promo_code, affiliate_link, promo_guide, join_url, join_type, status, created_at
+        `SELECT id, title, description_short, description_long, commission_n1, commission_n2, commission_n3, price, image_url, promo_code, affiliate_link, promo_guide, join_url, join_type, status, created_at
          FROM marketplace_products WHERE id = ? LIMIT 1`
       ).bind(id).first();
     }
@@ -411,7 +411,7 @@ async function handleGetProduct(request, env, url) {
     if (row.status !== 'active' && row.status !== 'published') {
       return json({ error: 'Produit non publié' }, 404);
     }
-    return json({ product: row });
+    const response=json({ product: row });response.headers.set('Access-Control-Allow-Origin','*');response.headers.set('Cache-Control','no-store');return response;
   } catch (e) {
     return json({ error: String(e.message || e) }, 500);
   }
@@ -2346,3 +2346,4 @@ async function handleTTSCachedAudio(request, env, url) {
 
     try { await env.DB.prepare(`ALTER TABLE marketplace_products ADD COLUMN price_monthly REAL DEFAULT 0`).run(); } catch (_) {}
     try { await env.DB.prepare(`ALTER TABLE marketplace_products ADD COLUMN billing_type TEXT DEFAULT 'one_time'`).run(); } catch (_) {}
+
