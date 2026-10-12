@@ -775,7 +775,11 @@ const url = new URL(request.url);
     }
     // Lien de création d'équipe / parrainage → inscription
     if (path.startsWith('/r/')) {
-      const code = path.slice(3).split('/')[0];
+      const code = path.slice(3).split('/')[0].trim().toUpperCase();
+      if (/^[A-Z0-9_-]{3,32}$/.test(code) && request.method === 'GET' && env.CASHFLOW_KV) {
+        const owner=await env.DB.prepare('SELECT id FROM users WHERE affiliate_code = ?').bind(code).first();
+        if (owner) await env.CASHFLOW_KV.put('ref_click:'+code+':event:'+crypto.randomUUID(),'1',{expirationTtl:120*24*3600});
+      }
       return Response.redirect(url.origin + '/inscription.html?ref=' + encodeURIComponent(code), 302);
     }
 
