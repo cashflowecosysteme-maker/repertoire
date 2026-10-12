@@ -461,6 +461,12 @@ dialog.circle-detail{width:min(760px,calc(100% - 32px));max-height:90vh;overflow
 <script src="/starry-bg.js" defer></script>
 <script>
 var ALL = [];
+function nyxiaEscape(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function nyxiaInline(value){return nyxiaEscape(value).replace(/\*\*([^\n]+?)\*\*/g,'<strong>$1</strong>').replace(/__([^\n]+?)__/g,'<strong>$1</strong>').replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g,'$1<em>$2</em>').replace(/`([^`\n]+)`/g,'<code>$1</code>');}
+function nyxiaMarkdown(value){const lines=String(value??'').replace(/\r\n?/g,'\n').split('\n');let html='',paragraph=[],list='',items=[];function flushParagraph(){if(paragraph.length){html+='<p style="margin:0 0 12px">'+paragraph.map(nyxiaInline).join('<br>')+'</p>';paragraph=[];}}function flushList(){if(list){html+='<'+list+' style="margin:0 0 12px;padding-left:24px">'+items.map(v=>'<li>'+nyxiaInline(v)+'</li>').join('')+'</'+list+'>';list='';items=[];}}for(const line of lines){if(!line.trim()){flushParagraph();flushList();continue;}const heading=line.match(/^(#{1,6})\s+(.+)$/),unordered=line.match(/^\s*[-*+]\s+(.+)$/),ordered=line.match(/^\s*\d+[.)]\s+(.+)$/);if(heading){flushParagraph();flushList();const level=Math.min(heading[1].length+1,6);html+='<h'+level+'>'+nyxiaInline(heading[2])+'</h'+level+'>';}else if(unordered||ordered){flushParagraph();const type=unordered?'ul':'ol';if(list&&list!==type)flushList();list=type;items.push((unordered||ordered)[1]);}else{flushList();paragraph.push(line);}}flushParagraph();flushList();return html;}
+function nyxiaPlain(value){return String(value??'').replace(/\*\*|__/g,'').replace(/(^|[^*])\*([^*\n]+)\*/g,'$1$2').replace(/`([^`]+)`/g,'$1').replace(/^#{1,6}\s+/gm,'');}
+function nyxiaCommissions(product){const rates=[1,2,3].map(n=>{const raw=product['commission_n'+n];if(raw==null||raw==='')return '';const value=Number(raw);return Number.isFinite(value)&&value>=0?'Cercle '+n+' : '+value.toLocaleString('fr-CA')+' %':'';}).filter(Boolean);return rates.length?'<div class="nyxia-commissions" style="margin:14px 0;padding:12px 14px;border:1px solid rgba(244,200,66,.35);border-radius:12px;color:#F4C842;font-size:13px;line-height:1.6"><strong>Commissions de cette offre</strong><br>'+rates.join(' · ')+'</div>':'';}
+
 var SORT = 'default';
 
 function money(n){
@@ -524,7 +530,7 @@ function render(){
     var badge = p.promo_code
       ? '<span class="card-badge">Code ' + escapeHtml(p.promo_code) + '</span>'
       : '';
-    var desc = (p.description_short || '').slice(0, 140);
+    var desc = nyxiaPlain(p.description_short || '').slice(0, 140);
     return (
       '<article class="card" style="animation-delay:' + (Math.min(i,10) * 0.05).toFixed(2) + 's">' +
         '<div class="card-media">' + media + badge + '</div>' +
@@ -532,6 +538,7 @@ function render(){
           '<h3 class="card-title">' + escapeHtml(p.title || 'Sans titre') + '</h3>' +
           '<p class="card-desc">' + escapeHtml(desc) + (desc.length >= 140 ? '…' : '') + '</p>' +
           '<div class="card-meta"><span class="card-price">' + money(p.price) + '</span></div>' +
+          nyxiaCommissions(p) +
           '<button type="button" class="card-cta" data-circle-product="' + escapeAttr(String(p.id)) + '">En Savoir Plus</button>' +
         '</div>' +
       '</article>'
@@ -553,11 +560,11 @@ fetch('/api/repertoire')
 <!-- ══════════ HELPDESK NyXia ══════════ -->
 <iframe id="nyxia-helpdesk-frame" title="Helpdesk NyXia" src="https://repertoire.nyxia.top/helpdesk-page.html" style="position:fixed;right:14px;bottom:14px;width:260px;height:90px;max-width:calc(100vw - 28px);border:0;z-index:9999;background:transparent"></iframe>
 <script>(function(){var f=document.getElementById('nyxia-helpdesk-frame');window.addEventListener('message',function(e){if(e.origin!=='https://repertoire.nyxia.top'||e.source!==f.contentWindow||!e.data||e.data.type!=='nyxia-helpdesk')return;f.style.width=e.data.open?'400px':'260px';f.style.height=e.data.open?'min(600px, calc(100dvh - 28px))':'90px';});})();</script>
-<dialog id="circleDetail" class="circle-detail" aria-labelledby="circleTitle"><button type="button" class="circle-close" aria-label="Fermer">×</button><p style="color:#F4C842">💜 PRODUIT DU CERCLE</p><h2 id="circleTitle"></h2><img id="circleImage" alt=""><p id="circleDescription"></p><p class="circle-invite">💜 Rejoins immédiatement le Cercle d’entraide ! L’inscription est gratuite.</p><div class="circle-actions"><a id="circleOffer" target="_blank" rel="noopener">Voir l’offre</a><a class="circle-join" id="circleJoin" target="_blank" rel="noopener">Rejoindre le Cercle</a><a href="https://promoteurs.nyxia.top/login.html" target="_blank" rel="noopener">Déjà membre ?</a></div></dialog>
+<dialog id="circleDetail" class="circle-detail" aria-labelledby="circleTitle"><button type="button" class="circle-close" aria-label="Fermer">×</button><p style="color:#F4C842">💜 PRODUIT DU CERCLE</p><h2 id="circleTitle"></h2><img id="circleImage" alt=""><div id="circleDescription"></div><p class="circle-invite">💜 Rejoins immédiatement le Cercle d’entraide ! L’inscription est gratuite.</p><div class="circle-actions"><a id="circleOffer" target="_blank" rel="noopener">Voir l’offre</a><a class="circle-join" id="circleJoin" target="_blank" rel="noopener">Rejoindre le Cercle</a><a href="https://promoteurs.nyxia.top/login.html" target="_blank" rel="noopener">Déjà membre ?</a></div></dialog>
 <script>
 (function(){const dialog=document.getElementById('circleDetail');let opener;
 function safeLink(raw){try{const u=new URL(raw,location.origin);return /^https?:$/.test(u.protocol)?u:null;}catch(e){return null;}}
-document.getElementById('grid').addEventListener('click',function(e){const button=e.target.closest('[data-circle-product]');if(!button)return;const p=ALL.find(item=>String(item.id)===button.dataset.circleProduct);if(!p)return;opener=button;document.getElementById('circleTitle').textContent=p.title||'Produit du Cercle';document.getElementById('circleDescription').textContent=p.description_long||p.description_short||'';const image=document.getElementById('circleImage');const imageURL=safeLink(p.image_url||'');image.hidden=!p.image_url||!imageURL;if(!image.hidden){image.src=imageURL.href;image.alt=p.title||'';}
+document.getElementById('grid').addEventListener('click',function(e){const button=e.target.closest('[data-circle-product]');if(!button)return;const p=ALL.find(item=>String(item.id)===button.dataset.circleProduct);if(!p)return;opener=button;document.getElementById('circleTitle').textContent=p.title||'Produit du Cercle';document.getElementById('circleDescription').innerHTML=nyxiaMarkdown(p.description_long||p.description_short||'')+nyxiaCommissions(p);const image=document.getElementById('circleImage');const imageURL=safeLink(p.image_url||'');image.hidden=!p.image_url||!imageURL;if(!image.hidden){image.src=imageURL.href;image.alt=p.title||'';}
 const ref=new URL(location.href).searchParams.get('ref');const offer=safeLink(p.affiliate_link||'');const offerButton=document.getElementById('circleOffer');offerButton.hidden=!p.affiliate_link||!offer;if(offer){if(ref)offer.searchParams.set('ref',ref);offerButton.href=offer.href;}
 const signup=new URL('https://www.universnyxia.top/nyxia/cercledentraide');if(ref)signup.searchParams.set('ref',ref);document.getElementById('circleJoin').href=signup.href;dialog.showModal();});
 dialog.querySelector('.circle-close').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});dialog.addEventListener('close',()=>{if(opener)opener.focus();});})();

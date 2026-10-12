@@ -426,7 +426,7 @@ async function handlePublicRepertoire(request, env) {
     let results = [];
     try {
       const r = await env.DB.prepare(
-        `SELECT id, title, description_short, description_long, price, price_monthly, billing_type, image_url, status, promo_code, affiliate_link, promo_guide, join_url, join_type, created_at
+        `SELECT id, title, description_short, description_long, commission_n1, commission_n2, commission_n3, price, price_monthly, billing_type, image_url, status, promo_code, affiliate_link, promo_guide, join_url, join_type, created_at
          FROM marketplace_products
          WHERE status = 'active' OR status = 'published'
          ORDER BY created_at DESC LIMIT 200`
@@ -434,7 +434,7 @@ async function handlePublicRepertoire(request, env) {
       results = r.results || [];
     } catch (e1) {
       const r = await env.DB.prepare(
-        `SELECT id, title, description_short, description_long, price, image_url, status, promo_code, affiliate_link, created_at
+        `SELECT id, title, description_short, description_long, commission_n1, commission_n2, commission_n3, price, image_url, status, promo_code, affiliate_link, created_at
          FROM marketplace_products
          WHERE status = 'active' OR status = 'published'
          ORDER BY created_at DESC LIMIT 200`
