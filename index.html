@@ -97,7 +97,8 @@ button{cursor:pointer;font-family:inherit;border:none;outline:none;color:inherit
 .hero-note{color:var(--text-muted);font-size:.95rem;font-style:italic;margin-bottom:26px;max-width:520px}
 .hero-cta{display:flex;flex-wrap:wrap;gap:12px}
 .hero-visual{position:relative}
-.hero-visual img{  width:100%;height:auto;border-radius:24px;
+.hero-visual img{
+  width:100%;height:auto;border-radius:24px;
   filter:drop-shadow(0 24px 60px rgba(123,92,255,.4));
   animation:floatY 6s ease-in-out infinite;
 }
@@ -196,9 +197,10 @@ button{cursor:pointer;font-family:inherit;border:none;outline:none;color:inherit
 }
 .card-body{padding:20px;display:flex;flex-direction:column;gap:9px;flex:1}
 .card-title{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:1.4rem;color:#fff;line-height:1.2}
-.card-desc{font-size:.9rem;color:var(--text-secondary);line-height:1.5;flex:1}.card-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
+.card-desc{font-size:.9rem;color:var(--text-secondary);line-height:1.5;flex:1}
+.card-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
 .card-price{font-family:'Space Grotesk',Outfit,sans-serif;font-size:1.25rem;font-weight:700;color:var(--green)}
-button.card-cta,.card-cta{font:inherit;width:100%;text-align:center;
+.card-cta{
   margin-top:12px;padding:12px 16px;border-radius:var(--radius-sm);text-align:center;
   background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;
   font-size:.86rem;font-weight:600;box-shadow:0 4px 14px var(--primary-glow);
@@ -295,7 +297,8 @@ button.card-cta,.card-cta{font:inherit;width:100%;text-align:center;
 .nx-close{
   margin-left:auto;width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.06);
   color:var(--text-secondary);font-size:17px;display:flex;align-items:center;justify-content:center;transition:all var(--transition);
-}.nx-close:hover{color:#fff;background:rgba(255,255,255,.12)}
+}
+.nx-close:hover{color:#fff;background:rgba(255,255,255,.12)}
 .nx-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
 .nx-msg{
   max-width:86%;padding:11px 14px;border-radius:15px;font-size:.9rem;line-height:1.5;
@@ -331,53 +334,8 @@ button.card-cta,.card-cta{font:inherit;width:100%;text-align:center;
 @media(prefers-reduced-motion:reduce){
   *{animation:none!important;scroll-behavior:auto!important;transition:none!important}
 }
-
-/* Fiche produit sur l'index (modal) */
-.prod-modal-bg{display:none;position:fixed;inset:0;z-index:80;background:rgba(4,6,16,.75);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:16px}
-.prod-modal-bg.open{display:flex}
-.prod-modal{width:100%;max-width:560px;max-height:90vh;overflow:auto;background:linear-gradient(180deg,#121834,#0a0e20);border:1px solid rgba(123,92,255,.35);border-radius:20px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
-.prod-modal-media{aspect-ratio:16/9;background:#0a1028;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.prod-modal-media img{width:100%;height:100%;object-fit:cover}
-.prod-modal-body{padding:22px}
-.prod-modal-body h2{font-family:'Cormorant Garamond',Georgia,serif;color:#fff;font-size:1.7rem;margin:0 0 10px}
-.prod-modal-desc{color:var(--text-secondary,#b9b3d6);font-size:.95rem;margin-bottom:12px;white-space:pre-wrap}
-.prod-modal-price{color:var(--green,#34d399);font-weight:700;font-size:1.25rem;margin-bottom:18px}
-.prod-modal-btns{display:flex;flex-wrap:wrap;gap:10px}
-.prod-modal-btns .btn-buy{display:inline-flex;padding:13px 18px;border-radius:12px;background:linear-gradient(135deg,#7B5CFF,#5A6CFF);color:#fff;font-weight:700;text-decoration:none;border:none;cursor:pointer;font-family:Outfit,sans-serif;font-size:.92rem}
-.prod-modal-btns .btn-promo{display:inline-flex;padding:13px 18px;border-radius:12px;background:rgba(123,92,255,.12);border:1px solid rgba(123,92,255,.3);color:#fff;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;font-size:.92rem}
-.prod-modal-x{position:absolute;top:12px;right:14px;background:rgba(0,0,0,.35);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.2rem;z-index:2}
-.prod-modal-wrap{position:relative}
-.promo-panel{display:none;margin-top:16px;padding:16px;border-radius:14px;background:rgba(6,10,24,.65);border:1px solid rgba(123,92,255,.3)}
-.promo-panel.open{display:block}
-.promo-panel h3{color:#fff;font-size:.95rem;margin:0 0 8px}
-.promo-panel .guide{white-space:pre-wrap;color:#b9b3d6;font-size:.9rem;margin-bottom:12px;line-height:1.5}
-.promo-panel .benefit{font-size:.88rem;color:#c4b5fd;margin:0 0 12px;padding:10px 12px;border-radius:10px;background:rgba(123,92,255,.12);border:1px solid rgba(123,92,255,.22)}
-.promo-status{font-size:.9rem;font-weight:600;margin:0 0 12px;padding:10px 12px;border-radius:10px}
-.promo-status.free{color:#6ee7b7;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3)}
-.promo-status.paid{color:#F4C842;background:rgba(244,200,66,.12);border:1px solid rgba(244,200,66,.3)}
-.promo-tools{margin:0 0 14px;padding:12px 14px;border-radius:12px;background:rgba(123,92,255,.06);border:1px solid rgba(123,92,255,.18)}
-.promo-tools h3{color:#fff;font-size:.9rem;margin:0 0 8px}
-.promo-tools ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-.promo-tools li{font-size:.85rem;color:#c9c4e6;line-height:1.4}
-.promo-panel code{display:block;word-break:break-all;padding:10px;border-radius:10px;background:rgba(0,0,0,.45);border:1px solid rgba(123,92,255,.25);color:#e9e5ff;font-size:.78rem;margin:8px 0 12px}
-.promo-panel .btn-copy{
-  display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:12px;
-  background:linear-gradient(135deg,#7B5CFF,#5A6CFF);color:#fff!important;font-weight:700;
-  border:none;cursor:pointer;font-family:Outfit,sans-serif;font-size:.9rem
-}
-.promo-panel .btn-join{
-  display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:12px;
-  background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.4);color:#34d399!important;
-  font-weight:700;text-decoration:none;font-family:Outfit,sans-serif;font-size:.9rem;margin-left:8px
-}
-.promo-panel .btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
-
-
-.card-actions{display:flex;flex-direction:column;gap:8px;margin-top:6px}
-.card-actions .card-cta{width:100%}
-.card-buy{background:linear-gradient(135deg,#7B5CFF,#5A6CFF)!important}
-.card-promo{background:rgba(123,92,255,.14)!important;border:1px solid rgba(123,92,255,.35)!important}
-
+dialog.circle-detail{width:min(760px,calc(100% - 32px));max-height:90vh;overflow:auto;margin:auto;padding:24px;border:1px solid rgba(123,92,255,.35);border-radius:24px;background:#0F1C3F;color:#D6D9F0}dialog.circle-detail::backdrop{background:rgba(4,8,18,.85);backdrop-filter:blur(6px)}.circle-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.circle-actions a{padding:10px 16px;border-radius:30px;border:1px solid rgba(123,92,255,.4);color:#fff;text-decoration:none}.circle-actions .circle-join{background:linear-gradient(135deg,#7B5CFF,#5A6CFF)}.circle-close{float:right;border:1px solid rgba(123,92,255,.3);border-radius:50%;background:transparent;color:#fff;padding:8px 12px;cursor:pointer}.circle-detail img{width:100%;border-radius:16px;margin:18px 0;max-height:380px;object-fit:contain}.circle-invite{padding:14px;border:1px solid rgba(244,200,66,.3);border-radius:14px;margin-top:18px;color:#F4C842}.card-cta{cursor:pointer;font:inherit}
+.card .card-cta,.circle-actions a,.circle-actions .circle-join{display:inline-flex;align-items:center;justify-content:center;width:auto;min-height:40px;padding:10px 18px;border:1px solid rgba(214,217,240,.25);border-radius:14px;background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.025));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 4px 16px rgba(0,0,0,.18);color:#D6D9F0;font-size:13px;font-weight:500;text-decoration:none;transition:background .2s,border-color .2s,transform .2s}.card .card-cta:hover,.circle-actions a:hover{background:rgba(255,255,255,.12);border-color:rgba(244,200,66,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 4px 16px rgba(0,0,0,.18);transform:translateY(-1px);color:#fff}.card .card-cta:focus-visible,.circle-actions a:focus-visible{outline:2px solid #F4C842;outline-offset:3px}
 </style>
 </head>
 <body>
@@ -394,7 +352,8 @@ button.card-cta,.card-cta{font:inherit;width:100%;text-align:center;
     <div class="socials">
       <a class="social-btn" href="https://www.facebook.com/LeMiroirdeNyXia/" target="_blank" rel="noopener" aria-label="Facebook">
         <svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 10-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0022 12z"/></svg>
-      </a>      <a class="social-btn" href="https://www.instagram.com/nyxia_ia/" target="_blank" rel="noopener" aria-label="Instagram">
+      </a>
+      <a class="social-btn" href="https://www.instagram.com/nyxia_ia/" target="_blank" rel="noopener" aria-label="Instagram">
         <svg viewBox="0 0 24 24"><path d="M12 2c2.7 0 3 0 4.1.1 1 .1 1.7.2 2.3.5.6.2 1.1.5 1.6 1s.8 1 1 1.6c.3.6.4 1.3.5 2.3.1 1.1.1 1.4.1 4.1s0 3-.1 4.1c-.1 1-.2 1.7-.5 2.3-.2.6-.5 1.1-1 1.6s-1 .8-1.6 1c-.6.3-1.3.4-2.3.5-1.1.1-1.4.1-4.1.1s-3 0-4.1-.1c-1-.1-1.7-.2-2.3-.5-.6-.2-1.1-.5-1.6-1s-.8-1-1-1.6c-.3-.6-.4-1.3-.5-2.3C2 15 2 14.7 2 12s0-3 .1-4.1c.1-1 .2-1.7.5-2.3.2-.6.5-1.1 1-1.6s1-.8 1.6-1c.6-.3 1.3-.4 2.3-.5C9 2 9.3 2 12 2zm0 1.8c-2.7 0-3 0-4 .1-.8 0-1.2.2-1.5.3-.4.1-.7.3-1 .6s-.5.6-.6 1c-.1.3-.3.7-.3 1.5-.1 1-.1 1.3-.1 4s0 3 .1 4c0 .8.2 1.2.3 1.5.1.4.3.7.6 1s.6.5 1 .6c.3.1.7.3 1.5.3 1 .1 1.3.1 4 .1s3 0 4-.1c.8 0 1.2-.2 1.5-.3.4-.1.7-.3 1-.6s.5-.6.6-1c.1-.3.3-.7.3-1.5.1-1 .1-1.3.1-4s0-3-.1-4c0-.8-.2-1.2-.3-1.5-.1-.4-.3-.7-.6-1s-.6-.5-1-.6c-.3-.1-.7-.3-1.5-.3-1-.1-1.3-.1-4-.1zm0 3.1a5.1 5.1 0 110 10.2 5.1 5.1 0 010-10.2zm0 1.8a3.3 3.3 0 100 6.6 3.3 3.3 0 000-6.6zm5.3-3.1a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z"/></svg>
       </a>
       <a class="social-btn" href="https://www.tiktok.com/@lemiroirdenyxia" target="_blank" rel="noopener" aria-label="TikTok">
@@ -493,7 +452,8 @@ button.card-cta,.card-cta{font:inherit;width:100%;text-align:center;
     <a href="#">Confidentialité</a>
     <a href="#">CGU</a>
     <a href="https://m.me/LeMiroirdeNyXia" target="_blank" rel="noopener">Contact</a>
-    <!-- ⤵ Lien vers l'espace membre (connexion) -->    <a href="#">Mon espace</a>
+    <!-- ⤵ Lien vers l'espace membre (connexion) -->
+    <a href="#">Mon espace</a>
   </div>
   <p class="footer-sign">Propulsé par <b>NyXia</b> · Le Cercle d'entraide · ✨ Visionnaire depuis 1997 ✨</p>
 </footer>
@@ -501,16 +461,19 @@ button.card-cta,.card-cta{font:inherit;width:100%;text-align:center;
 <script src="/starry-bg.js" defer></script>
 <script>
 var ALL = [];
+function nyxiaEscape(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function nyxiaInline(value){return nyxiaEscape(value).replace(/\*\*([^\n]+?)\*\*/g,'<strong>$1</strong>').replace(/__([^\n]+?)__/g,'<strong>$1</strong>').replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g,'$1<em>$2</em>').replace(/`([^`\n]+)`/g,'<code>$1</code>');}
+function nyxiaMarkdown(value){const lines=String(value??'').replace(/\r\n?/g,'\n').split('\n');let html='',paragraph=[],list='',items=[];function flushParagraph(){if(paragraph.length){html+='<p style="margin:0 0 12px">'+paragraph.map(nyxiaInline).join('<br>')+'</p>';paragraph=[];}}function flushList(){if(list){html+='<'+list+' style="margin:0 0 12px;padding-left:24px">'+items.map(v=>'<li>'+nyxiaInline(v)+'</li>').join('')+'</'+list+'>';list='';items=[];}}for(const line of lines){if(!line.trim()){flushParagraph();flushList();continue;}const heading=line.match(/^(#{1,6})\s+(.+)$/),unordered=line.match(/^\s*[-*+]\s+(.+)$/),ordered=line.match(/^\s*\d+[.)]\s+(.+)$/);if(heading){flushParagraph();flushList();const level=Math.min(heading[1].length+1,6);html+='<h'+level+'>'+nyxiaInline(heading[2])+'</h'+level+'>';}else if(unordered||ordered){flushParagraph();const type=unordered?'ul':'ol';if(list&&list!==type)flushList();list=type;items.push((unordered||ordered)[1]);}else{flushList();paragraph.push(line);}}flushParagraph();flushList();return html;}
+function nyxiaPlain(value){return String(value??'').replace(/\*\*|__/g,'').replace(/(^|[^*])\*([^*\n]+)\*/g,'$1$2').replace(/`([^`]+)`/g,'$1').replace(/^#{1,6}\s+/gm,'');}
+function nyxiaCommissions(product){return '<p style="margin:14px 0;color:#F4C842">Voir l’offre pour connaître les commissions.</p>';}
+
 var SORT = 'default';
 
 function money(n){
   return Number(n||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' $';
 }
-function isFreeAppointment(p){
-  return !!p && p.billing_type === 'appointment_free';
-}
 function escapeHtml(s){
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function escapeAttr(s){ return escapeHtml(s).replace(/'/g,'&#39;'); }
 
@@ -530,184 +493,6 @@ function sortList(list){
   return arr;
 }
 
-
-/* Empreinte du PROMOTEUR (celui qui partage) — pas le ref visiteur */
-function getMyPromoCode(){
-  try {
-    return (localStorage.getItem('nyxia_promoter_code') || sessionStorage.getItem('nyxia_promoter_code') || '').trim().toUpperCase();
-  } catch(e){ return ''; }
-}
-function setMyPromoCode(code){
-  code = String(code||'').trim().toUpperCase();
-  if(!code) return;
-  try {
-    localStorage.setItem('nyxia_promoter_code', code);
-    sessionStorage.setItem('nyxia_promoter_code', code);
-  } catch(e){}
-}
-function withRef(url){
-  /* Pour Acheter : conserve le ref VISITEUR (qui l'a amené) */
-  var ref = window.__NYXIA_REF || '';
-  if(!url) return '#';
-  if(!ref) return url;
-  try{ var u=new URL(url,location.origin); u.searchParams.set('ref',ref); return u.toString(); }
-  catch(e){ return url+(url.indexOf('?')>=0?'&':'?')+'ref='+encodeURIComponent(ref); }
-}
-function promoInscriptionUrl(productId, opts){
-  opts = opts || {};
-  var u = new URL('/inscription.html', location.origin);
-  if(productId) u.searchParams.set('product', productId);
-  u.searchParams.set('intent', opts.intent || 'promo');
-  if(opts.free) u.searchParams.set('free', '1');
-  if(window.__NYXIA_REF) u.searchParams.set('ref', window.__NYXIA_REF);
-  return u.toString();
-}
-function openProductModal(id){
-  var p = (window.ALL||ALL||[]).find(function(x){ return String(x.id)===String(id); });
-  if(!p) return;
-  var media = document.getElementById('prodModalMedia');
-  if(p.image_url) media.innerHTML = '<img src=\"'+escapeAttr(p.image_url)+'\" alt=\"\">';
-  else media.innerHTML = '<img src=\"/NyXia.png\" alt=\"\" style=\"width:90px;height:90px;border-radius:50%\">';
-  document.getElementById('prodModalTitle').textContent = p.title || '';
-  document.getElementById('prodModalDesc').textContent = p.description_long || p.description_short || '';
-  var appointment = isFreeAppointment(p);
-  var modalPrice = document.getElementById('prodModalPrice');
-  modalPrice.textContent = appointment ? '' : (money(p.price) + (p.price_monthly && Number(p.price_monthly)>0 ? ' · '+money(p.price_monthly)+'/mois' : ''));
-  modalPrice.style.display = appointment ? 'none' : 'block';
-  var buy = document.getElementById('prodModalBuy');
-  var offer = p.affiliate_link || '';
-  buy.textContent = appointment ? 'Prendre un rendez-vous' : 'Acheter le produit';
-  if(offer){ buy.href = withRef(offer); buy.style.display = 'inline-flex'; }
-  else { buy.removeAttribute('href'); buy.style.display = 'none'; }
-  document.getElementById('promoPanel').classList.remove('open');
-  var guide = (p.promo_guide||'').trim();
-  document.getElementById('promoGuide').textContent = guide || 'Bientôt : publications prêtes, angles et messages types pour présenter ce produit facilement.';
-  // Gratuit ou payant : décidé PAR PRODUIT (join_type). Le prix d'un produit payant vit sur sa page de paiement.
-  var _isPaidJoin = (p.join_type==='paid') || (Number(p.price)>0 && p.join_type!=='free');
-  var statusEl = document.getElementById('promoStatus');
-  if(statusEl){
-    statusEl.textContent = _isPaidJoin
-      ? '🔑 Accès promoteur — le tarif est indiqué sur la page du produit.'
-      : '✨ Promotion gratuite pour toi — crée ton empreinte et partage.';
-    statusEl.className = 'promo-status ' + (_isPaidJoin ? 'paid' : 'free');
-  }
-  var myCode = getMyPromoCode();
-  var share = '';
-  var shareEl = document.getElementById('promoShare');
-  var copyBtn = document.getElementById('promoCopy');
-  var join = document.getElementById('promoJoin');
-  var guideEl = document.getElementById('promoGuide');
-
-  if(myCode){
-    share = location.origin + '/?product=' + encodeURIComponent(p.id) + '&ref=' + encodeURIComponent(myCode);    shareEl.textContent = share;
-    shareEl.style.opacity = '1';
-    if(copyBtn){
-      copyBtn.style.display = 'inline-flex';
-      copyBtn.textContent = 'Copier mon lien (empreinte ' + myCode + ')';
-      copyBtn.onclick = function(){
-        navigator.clipboard.writeText(share).then(function(){
-          copyBtn.textContent = 'Copié ✓';
-          setTimeout(function(){ copyBtn.textContent = 'Copier mon lien (empreinte ' + myCode + ')'; }, 1600);
-        });
-      };
-    }
-  } else {
-    share = '';
-    shareEl.textContent = 'Tu n’as pas encore d’empreinte unique. Inscris-toi d’abord — gratuit ou payant selon le produit — pour recevoir ton code et partager ce lien.';
-    shareEl.style.opacity = '0.95';
-    if(copyBtn){
-      copyBtn.style.display = 'inline-flex';
-      copyBtn.textContent = 'Créer mon empreinte unique';
-      copyBtn.onclick = function(){
-        var isPaidJoin = (p.join_type==='paid') || (Number(p.price)>0 && p.join_type!=='free');
-        var salesUrl = p.join_url || p.affiliate_link || '';
-        if(isPaidJoin && salesUrl){
-          // Produit PAYANT → page de vente du produit promoteur (l'empreinte est générée à l'achat)
-          window.location.href = withRef(salesUrl);
-        } else {
-          // Offre GRATUITE (ou payante sans lien de vente) → page d'inscription pour recevoir l'empreinte
-          window.location.href = promoInscriptionUrl(p.id, { intent:'promo', free: !isPaidJoin });
-        }
-      };
-    }
-  }
-
-  if(join){
-    var isPaidJoin = (p.join_type==='paid') || (Number(p.price)>0 && p.join_type!=='free');
-    if(p.join_url && isPaidJoin){
-      // Payant : lien d’offre (l’achat génère l’empreinte via webhook)
-      join.href = withRef(p.join_url);
-      join.style.display = 'inline-flex';
-      join.textContent = 'Rejoindre le cercle (payant) — mon code à l’achat';
-    } else if(p.join_url && !isPaidJoin){
-      // Gratuit : page d’inscription pour recevoir une empreinte unique
-      join.href = promoInscriptionUrl(p.id, { intent:'join', free:true });
-      join.style.display = 'inline-flex';
-      join.textContent = 'Rejoindre gratuitement (recevoir mon empreinte)';
-    } else if(!isPaidJoin){
-      join.href = promoInscriptionUrl(p.id, { intent:'join', free:true });
-      join.style.display = 'inline-flex';
-      join.textContent = 'Rejoindre gratuitement (recevoir mon empreinte)';
-    } else {
-      // Sans lien de paiement configuré, garder l'inscription Cloudflare accessible.
-      join.href = promoInscriptionUrl(p.id, { intent:'promo', free:false });
-      join.style.display = 'inline-flex';
-      join.textContent = 'Rejoindre le Cercle d’entraide';
-    }
-    if(myCode){
-      join.href = 'https://promoteurs.nyxia.top/login.html';
-      join.style.display = 'inline-flex';
-      join.textContent = 'Accéder à mon tableau de bord Promoteurs';
-      join.target = '_blank';
-    }
-  }
-
-  if(guideEl && !myCode){
-    var baseGuide = (p.promo_guide||'').trim();
-    guideEl.textContent = (baseGuide ? baseGuide + '\n\n' : '') +
-      'Pour promouvoir ce produit, tu dois d’abord avoir ton empreinte unique. Sans code, le lien ne permet pas de savoir qui doit être relié aux revenus.';
-  }
-
-  document.getElementById('prodModal').classList.add('open');
-  document.getElementById('prodModalPromo').onclick = function(){
-    var pan = document.getElementById('promoPanel');
-    pan.classList.add('open');
-    pan.scrollIntoView({ behavior:'smooth', block:'nearest' });
-  };
-  var buyBtn = document.getElementById('prodModalBuy');
-  if (buyBtn && (!p.affiliate_link)) buyBtn.style.display = 'none';
-}
-
-function bindProductButtons(){
-  document.querySelectorAll('[data-buy-product]').forEach(function(btn){
-    btn.onclick = function(e){
-      e.preventDefault();
-      var id = btn.getAttribute('data-buy-product');
-      var p = (typeof ALL!=='undefined'?ALL:[]).find(function(x){ return String(x.id)===String(id); });
-      if(!p) return;
-      var url = p.affiliate_link || '';
-      if(!url){ alert(isFreeAppointment(p) ? 'Lien de prise de rendez-vous pas encore configuré.' : 'Lien d’achat pas encore configuré pour ce produit.'); return; }
-      var ref = window.__NYXIA_REF || '';
-      if(ref){
-        try{ var u=new URL(url, location.origin); u.searchParams.set('ref', ref); url=u.toString(); }
-        catch(err){ url = url + (url.indexOf('?')>=0?'&':'?') + 'ref=' + encodeURIComponent(ref); }
-      }
-      window.open(url, '_blank', 'noopener');
-    };
-  });
-  document.querySelectorAll('[data-promo-product]').forEach(function(btn){
-    btn.onclick = function(e){
-      e.preventDefault();
-      openProductModal(btn.getAttribute('data-promo-product'));
-      // open directly on promo panel
-      setTimeout(function(){
-        var pan = document.getElementById('promoPanel');
-        if(pan) pan.classList.add('open');
-      }, 50);
-    };
-  });
-}
-
 function render(){
   var q = (document.getElementById('q').value || '').toLowerCase().trim();
   var list = ALL.filter(function(p){
@@ -720,8 +505,8 @@ function render(){
 
   if(!ALL.length){
     grid.innerHTML =
-      '<div class=\"state\">' +
-        '<img src=\"/NyXia.png\" alt=\"NyXia\">' +
+      '<div class="state">' +
+        '<img src="/NyXia.png" alt="NyXia">' +
         '<h3>Le répertoire s\'éveille</h3>' +
         '<p>Les premiers produits du Cercle apparaîtront ici très bientôt.</p>' +
       '</div>';
@@ -729,8 +514,8 @@ function render(){
   }
   if(!list.length){
     grid.innerHTML =
-      '<div class=\"state\">' +
-        '<img src=\"/NyXia.png\" alt=\"NyXia\">' +
+      '<div class="state">' +
+        '<img src="/NyXia.png" alt="NyXia">' +
         '<h3>Aucun résultat</h3>' +
         '<p>Essaie un autre mot — le produit que tu cherches est peut-être là sous un autre nom.</p>' +
       '</div>';
@@ -738,31 +523,25 @@ function render(){
   }
 
   grid.innerHTML = list.map(function(p, i){
-    var pid = p.id;
+    var href = p.affiliate_link || ('/produit.html?id=' + encodeURIComponent(p.id));
     var media = p.image_url
-      ? '<img src=\"' + escapeAttr(p.image_url) + '\" alt=\"' + escapeAttr(p.title||'') + '\" loading=\"lazy\">'
-      : '<div class=\"card-media-empty\"><img src=\"/NyXia.png\" alt=\"NyXia\"></div>';
-    var appointment = isFreeAppointment(p);
+      ? '<img src="' + escapeAttr(p.image_url) + '" alt="' + escapeAttr(p.title||'') + '" loading="lazy">'
+      : '<div class="card-media-empty"><img src="/NyXia.png" alt="NyXia"></div>';
     var badge = p.promo_code
-      ? '<span class=\"card-badge\">Code ' + escapeHtml(p.promo_code) + '</span>'
-      : (appointment ? '<span class=\"card-badge\">Rencontre gratuite</span>' : '');
-    var desc = (p.description_short || '').slice(0, 140);
+      ? '<span class="card-badge">Code ' + escapeHtml(p.promo_code) + '</span>'
+      : '';
+    var desc = nyxiaPlain(p.description_short || '').slice(0, 140);
     return (
-      '<article class=\"card\" style=\"animation-delay:' + (Math.min(i,10) * 0.05).toFixed(2) + 's\">' +
-        '<div class=\"card-media\">' + media + badge + '</div>' +
-        '<div class=\"card-body\">' +
-          '<h3 class=\"card-title\">' + escapeHtml(p.title || 'Sans titre') + '</h3>' +
-          '<p class=\"card-desc\">' + escapeHtml(desc) + (desc.length >= 140 ? '…' : '') + '</p>' +
-          (appointment ? '' : '<div class=\"card-meta\"><span class=\"card-price\">' + money(p.price) + '</span></div>') +
-          '<div class=\"card-actions\">' +
-            '<button type=\"button\" class=\"card-cta card-buy\" data-buy-product=\"' + escapeAttr(String(pid)) + '\">' + (appointment ? 'Prendre un rendez-vous' : 'Acheter le produit') + '</button>' +
-            '<button type=\"button\" class=\"card-cta card-promo\" data-promo-product=\"' + escapeAttr(String(pid)) + '\">Promotion</button>' +
-          '</div>' +
+      '<article class="card" style="animation-delay:' + (Math.min(i,10) * 0.05).toFixed(2) + 's">' +
+        '<div class="card-media">' + media + badge + '</div>' +
+        '<div class="card-body">' +
+          '<h3 class="card-title">' + escapeHtml(p.title || 'Sans titre') + '</h3>' +
+          '<p class="card-desc">' + escapeHtml(desc) + (desc.length >= 140 ? '…' : '') + '</p>' +
+          '<button type="button" class="card-cta" data-circle-product="' + escapeAttr(String(p.id)) + '">En Savoir Plus</button>' +
         '</div>' +
       '</article>'
     );
   }).join('');
-  bindProductButtons();
 }
 
 fetch('/api/repertoire')
@@ -773,221 +552,23 @@ fetch('/api/repertoire')
   })
   .catch(function(){
     document.getElementById('grid').innerHTML =
-      '<div class=\"state\"><img src=\"/NyXia.png\" alt=\"NyXia\"><h3>Répertoire indisponible</h3><p>Réessaie dans un instant.</p></div>';
+      '<div class="state"><img src="/NyXia.png" alt="NyXia"><h3>Répertoire indisponible</h3><p>Réessaie dans un instant.</p></div>';
   });
 </script>
 <!-- ══════════ HELPDESK NyXia ══════════ -->
-<button class="nx-launcher" id="nxLauncher" aria-label="Ouvrir le chat NyXia">
-  <img src="/NyXia.png" alt="NyXia">
-  <span class="nx-launcher-label">Une question ? 💜</span>
-</button>
-<section class="nx-panel" id="nxPanel" aria-label="Chat d'aide NyXia">
-  <div class="nx-head">
-    <img src="/FavIcon.png" alt="NyXia">
-    <div>
-      <div class="nx-h-name">NyXia</div>
-      <div class="nx-h-status">En ligne</div>
-    </div>
-    <button class="nx-close" id="nxClose" aria-label="Fermer le chat">✕</button>
-  </div>
-  <div class="nx-body" id="nxBody"></div>
-  <div class="nx-chips" id="nxChips">
-    <button class="nx-chip" type="button" onclick="nxQuick(this.textContent)">C'est quoi le Répertoire ?</button>
-    <button class="nx-chip" type="button" onclick="nxQuick(this.textContent)">Comment rendre mon offre visible ?</button>
-    <button class="nx-chip" type="button" onclick="nxAskSpace()">Demander mon espace</button>
-  </div>
-  <div class="nx-inputbar">
-    <input type="text" id="nxInput" placeholder="Écris ton message…" aria-label="Ton message" onkeydown="if(event.key==='Enter')nxSend()">
-    <button class="nx-send" type="button" id="nxSend" onclick="nxSend()" aria-label="Envoyer">
-      <svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-7-8-3z"/></svg>
-    </button>
-  </div>
-</section>
-
+<iframe id="nyxia-helpdesk-frame" title="Helpdesk NyXia" src="https://repertoire.nyxia.top/helpdesk-page.html" style="position:fixed;right:14px;bottom:14px;width:260px;height:90px;max-width:calc(100vw - 28px);border:0;z-index:9999;background:transparent"></iframe>
+<script>(function(){var f=document.getElementById('nyxia-helpdesk-frame');window.addEventListener('message',function(e){if(e.origin!=='https://repertoire.nyxia.top'||e.source!==f.contentWindow||!e.data||e.data.type!=='nyxia-helpdesk')return;f.style.width=e.data.open?'400px':'260px';f.style.height=e.data.open?'min(600px, calc(100dvh - 28px))':'90px';});})();</script>
+<dialog id="circleDetail" class="circle-detail" aria-labelledby="circleTitle"><button type="button" class="circle-close" aria-label="Fermer">×</button><p style="color:#F4C842">💜 PRODUIT DU CERCLE</p><h2 id="circleTitle"></h2><img id="circleImage" alt=""><div id="circleDescription"></div><p class="circle-invite">💜 Rejoins immédiatement le Cercle d’entraide ! L’inscription est gratuite.</p><div class="circle-actions"><a id="circleOffer" target="_blank" rel="noopener">Voir l’offre</a><a class="circle-join" id="circleJoin" target="_blank" rel="noopener">Rejoindre le Cercle</a><a href="https://promoteurs.nyxia.top/login.html" target="_blank" rel="noopener">Déjà membre ?</a></div></dialog>
 <script>
-(function () {
-  var launcher = document.getElementById('nxLauncher');
-  var panel = document.getElementById('nxPanel');  var closeBtn = document.getElementById('nxClose');
-  var body = document.getElementById('nxBody');
-  var input = document.getElementById('nxInput');
-  var chips = document.getElementById('nxChips');
-  var MESSENGER = 'https://m.me/LeMiroirdeNyXia';
-  var history = [];
-  var greeted = false;
-  var busy = false;
-
-  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-  function fmt(s){
-    var h = esc(s);
-    h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-    h = h.replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
-    return h.replace(/\n/g,'<br>');
-  }
-  function addMsg(text, who){
-    var d = document.createElement('div');
-    d.className = 'nx-msg ' + (who === 'user' ? 'user' : 'bot');
-    d.innerHTML = fmt(text);
-    body.appendChild(d);
-    body.scrollTop = body.scrollHeight;
-  }
-  function typing(on){
-    var ex = document.getElementById('nxTyping');
-    if (on){
-      if (ex) return;
-      var t = document.createElement('div');
-      t.className = 'nx-typing'; t.id = 'nxTyping';
-      t.innerHTML = '<span></span><span></span><span></span>';
-      body.appendChild(t); body.scrollTop = body.scrollHeight;
-    } else if (ex){ ex.remove(); }
-  }
-  function openChat(){
-    panel.classList.add('open');
-    launcher.style.display = 'none';
-    if (!greeted){
-      greeted = true;
-      addMsg("Bonjour ✨ Je suis NyXia. Je t'aide à trouver le produit qu'il te faut dans le Répertoire, ou à rendre ta propre offre visible. Qu'est-ce qui t'amène ?", 'bot');
-    }
-    setTimeout(function(){ input.focus(); }, 100);
-  }
-  function closeChat(){
-    panel.classList.remove('open');
-    launcher.style.display = 'flex';
-  }
-  launcher.addEventListener('click', openChat);
-  closeBtn.addEventListener('click', closeChat);
-
-  window.nxQuick = function(q){ input.value = q; nxSend(); };
-  window.nxAskSpace = function(){
-    if (chips) chips.style.display = 'none';
-    addMsg('Demander mon espace', 'user');
-    addMsg("Avec joie 💜 Écris à l'équipe ici, on t'accueille et on ouvre ton espace ensemble : " + MESSENGER, 'bot');
-  };
-
-  window.nxSend = function(){
-    var msg = (input.value || '').trim();
-    if (!msg || busy) return;
-    if (chips) chips.style.display = 'none';
-    addMsg(msg, 'user');
-    history.push({ role:'user', content: msg });
-    input.value = '';
-    busy = true; typing(true);
-    fetch('/api/helpdesk', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ message: msg, history: history.slice(0, -1) })
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      typing(false); busy = false;
-      var reply = (data && data.content) || "Je reviens dans un instant 💜";
-      addMsg(reply, 'bot');
-      history.push({ role:'assistant', content: reply });
-      if (history.length > 20) history = history.slice(-20);
-    })
-    .catch(function(){
-      typing(false); busy = false;
-      addMsg("Petite interruption… tu peux réessayer, ou écrire directement à l'équipe : " + MESSENGER, 'bot');
-    });
-  };
-})();
-</script>
-
-<script>
-(function(){
-  function normalizeNyxiaRef(value){
-    return String(value||'').trim().toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,120);
-  }
-  function saveNyxiaRef(value){
-    var ref=normalizeNyxiaRef(value);
-    if(!ref)return '';
-    try{ localStorage.setItem('nyxia_ref',ref); }catch(e){}
-    try{
-      var maxAge=60*60*24*90;
-      document.cookie='nyxia_ref='+encodeURIComponent(ref)+'; Path=/; Max-Age='+maxAge+'; SameSite=Lax; Secure; Domain=.nyxia.top';
-    }catch(e){}
-    return ref;
-  }
-  function readSharedNyxiaRef(){
-    try{
-      var m=document.cookie.match(/(?:^|;\s*)nyxia_ref=([^;]+)/);
-      return m?normalizeNyxiaRef(decodeURIComponent(m[1])):'';
-    }catch(e){ return ''; }
-  }
-
-  var p = new URLSearchParams(location.search);
-  var ref = normalizeNyxiaRef(p.get('ref')||p.get('code')||'');
-  if(ref){
-    ref=saveNyxiaRef(ref);
-  }else{
-    try{ ref=normalizeNyxiaRef(localStorage.getItem('nyxia_ref')||''); }catch(e){ ref=''; }
-    if(!ref)ref=readSharedNyxiaRef();
-    if(ref)ref=saveNyxiaRef(ref);
-  }
-  window.__NYXIA_REF = ref || null;
-  // rewrite card links after render: hook render if exists
-  var _render = window.render;
-  if (typeof _render === 'function') {
-    window.render = function() {
-      _render.apply(this, arguments);
-      document.querySelectorAll('a.card-cta, a.card-cta').forEach(function(){});
-    };
-  }})();
-</script>
-
-<div class="prod-modal-bg" id="prodModal" role="dialog" aria-modal="true">
-  <div class="prod-modal prod-modal-wrap">
-    <button type="button" class="prod-modal-x" id="prodModalClose" aria-label="Fermer">×</button>
-    <div class="prod-modal-media" id="prodModalMedia"></div>
-    <div class="prod-modal-body">
-      <h2 id="prodModalTitle"></h2>
-      <p class="prod-modal-desc" id="prodModalDesc"></p>
-      <div class="prod-modal-price" id="prodModalPrice"></div>
-      <div class="prod-modal-btns">
-        <a class="btn-buy" id="prodModalBuy" href="#" target="_blank" rel="noopener">Acheter le produit</a>
-        <button type="button" class="btn-promo" id="prodModalPromo">Promotion</button>
-      </div>
-      <div class="promo-panel" id="promoPanel">
-        <h3>Faire la promotion</h3>
-        <p class="benefit" id="promoBenefit">En partageant ce produit, tu fais rayonner le Cercle — et grâce à ton lien personnel, les revenus générés te sont reliés.</p>
-        <div class="promo-status" id="promoStatus"></div>
-        <div class="promo-tools">
-          <h3>Ce que tu reçois pour promouvoir</h3>
-          <ul>
-            <li>🗺️ Ta Success RoadMap clé en main</li>
-            <li>🎨 Des visuels &amp; publications prêtes à partager</li>
-            <li>💜 L'accompagnement de Diane &amp; Éric — tu n'es jamais seul</li>
-            <li>🌍 Un terrain vivant de près de 97 000 personnes</li>
-            <li>📊 Le suivi de tes revenus, relié à ton empreinte</li>
-          </ul>
-        </div>
-        <div class="guide" id="promoGuide"></div>
-        <h3>Ton lien à partager</h3>
-        <code id="promoShare"></code>
-        <div class="btn-row">
-          <button type="button" class="btn-copy" id="promoCopy">Copier le lien</button>
-          <a class="btn-join" id="promoJoin" href="#" target="_blank" rel="noopener" style="display:none">Rejoindre le cercle</a>
-          <a class="btn-join" href="https://promoteurs.nyxia.top/login.html" target="_blank" rel="noopener">Déjà membre ? Mon tableau de bord</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-(function(){
-  var bg = document.getElementById('prodModal');
-  var x = document.getElementById('prodModalClose');
-  if(x) x.onclick = function(){ bg.classList.remove('open'); };
-  if(bg) bg.onclick = function(e){ if(e.target===bg) bg.classList.remove('open'); };
-  // deep link ?product=id
-  var pid = new URLSearchParams(location.search).get('product');
-  if(pid){
-    var t = setInterval(function(){
-      if(typeof ALL !== 'undefined' && ALL.length){ clearInterval(t); openProductModal(pid); }
-    }, 200);
-    setTimeout(function(){ clearInterval(t); }, 8000);
-  }
-})();
+(function(){const dialog=document.getElementById('circleDetail');let opener;
+function safeLink(raw){try{const u=new URL(raw,location.origin);return /^https?:$/.test(u.protocol)?u:null;}catch(e){return null;}}
+document.getElementById('grid').addEventListener('click',function(e){const button=e.target.closest('[data-circle-product]');if(!button)return;const p=ALL.find(item=>String(item.id)===button.dataset.circleProduct);if(!p)return;opener=button;document.getElementById('circleTitle').textContent=p.title||'Produit du Cercle';document.getElementById('circleDescription').innerHTML=nyxiaMarkdown(p.description_short||p.description_long||'')+nyxiaCommissions(p);const image=document.getElementById('circleImage');const imageURL=safeLink(p.image_url||'');image.hidden=!p.image_url||!imageURL;if(!image.hidden){image.src=imageURL.href;image.alt=p.title||'';}
+const params=new URL(location.href).searchParams;let ref=params.get('ref')||params.get('code')||window.__NYXIA_REF||'';if(!ref){try{ref=localStorage.getItem('nyxia_ref')||''}catch(e){}}if(!ref){try{const match=document.cookie.match(/(?:^|;\s*)nyxia_ref=([^;]+)/);if(match)ref=decodeURIComponent(match[1])}catch(e){}}if(ref){try{localStorage.setItem('nyxia_ref',ref)}catch(e){}try{document.cookie='nyxia_ref='+encodeURIComponent(ref)+'; Path=/; Max-Age=7776000; SameSite=Lax; Secure; Domain=.nyxia.top'}catch(e){}}const offer=safeLink(p.affiliate_link||'');const offerButton=document.getElementById('circleOffer');offerButton.hidden=!p.affiliate_link||!offer;if(offer){if(ref)offer.searchParams.set('ref',ref);offerButton.href=offer.href;}
+const joinButton=document.getElementById('circleJoin');const signup=p.join_url?safeLink(p.join_url):null;joinButton.hidden=!signup;if(signup){if(ref)signup.searchParams.set('ref',ref);joinButton.href=signup.href;}else{joinButton.removeAttribute('href');}dialog.showModal();});
+dialog.querySelector('.circle-close').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});dialog.addEventListener('close',()=>{if(opener)opener.focus();});})();
 </script>
 </body>
 </html>
+
+
+

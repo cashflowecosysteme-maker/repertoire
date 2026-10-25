@@ -537,7 +537,6 @@ function render(){
         '<div class="card-body">' +
           '<h3 class="card-title">' + escapeHtml(p.title || 'Sans titre') + '</h3>' +
           '<p class="card-desc">' + escapeHtml(desc) + (desc.length >= 140 ? '…' : '') + '</p>' +
-          '<div class="card-meta"><span class="card-price">' + money(p.price) + '</span></div>' +
           '<button type="button" class="card-cta" data-circle-product="' + escapeAttr(String(p.id)) + '">En Savoir Plus</button>' +
         '</div>' +
       '</article>'
@@ -564,8 +563,8 @@ fetch('/api/repertoire')
 (function(){const dialog=document.getElementById('circleDetail');let opener;
 function safeLink(raw){try{const u=new URL(raw,location.origin);return /^https?:$/.test(u.protocol)?u:null;}catch(e){return null;}}
 document.getElementById('grid').addEventListener('click',function(e){const button=e.target.closest('[data-circle-product]');if(!button)return;const p=ALL.find(item=>String(item.id)===button.dataset.circleProduct);if(!p)return;opener=button;document.getElementById('circleTitle').textContent=p.title||'Produit du Cercle';document.getElementById('circleDescription').innerHTML=nyxiaMarkdown(p.description_short||p.description_long||'')+nyxiaCommissions(p);const image=document.getElementById('circleImage');const imageURL=safeLink(p.image_url||'');image.hidden=!p.image_url||!imageURL;if(!image.hidden){image.src=imageURL.href;image.alt=p.title||'';}
-const ref=new URL(location.href).searchParams.get('ref');const offer=safeLink(p.affiliate_link||'');const offerButton=document.getElementById('circleOffer');offerButton.hidden=!p.affiliate_link||!offer;if(offer){if(ref)offer.searchParams.set('ref',ref);offerButton.href=offer.href;}
-const signup=new URL('https://www.universnyxia.top/nyxia/cercledentraide');if(ref)signup.searchParams.set('ref',ref);document.getElementById('circleJoin').href=signup.href;dialog.showModal();});
+const params=new URL(location.href).searchParams;let ref=params.get('ref')||params.get('code')||window.__NYXIA_REF||'';if(!ref){try{ref=localStorage.getItem('nyxia_ref')||''}catch(e){}}if(!ref){try{const match=document.cookie.match(/(?:^|;\s*)nyxia_ref=([^;]+)/);if(match)ref=decodeURIComponent(match[1])}catch(e){}}if(ref){try{localStorage.setItem('nyxia_ref',ref)}catch(e){}try{document.cookie='nyxia_ref='+encodeURIComponent(ref)+'; Path=/; Max-Age=7776000; SameSite=Lax; Secure; Domain=.nyxia.top'}catch(e){}}const offer=safeLink(p.affiliate_link||'');const offerButton=document.getElementById('circleOffer');offerButton.hidden=!p.affiliate_link||!offer;if(offer){if(ref)offer.searchParams.set('ref',ref);offerButton.href=offer.href;}
+const joinButton=document.getElementById('circleJoin');const signup=p.join_url?safeLink(p.join_url):null;joinButton.hidden=!signup;if(signup){if(ref)signup.searchParams.set('ref',ref);joinButton.href=signup.href;}else{joinButton.removeAttribute('href');}dialog.showModal();});
 dialog.querySelector('.circle-close').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});dialog.addEventListener('close',()=>{if(opener)opener.focus();});})();
 </script>
 </body>
